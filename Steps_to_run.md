@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 2a. Update your model_path in config file.
 
-3.Run predictions
+3. Run predictions
 
 ```bash
 python inference.py
@@ -35,4 +35,4 @@ python batch_inference.py --input_csv batch_input.csv --output_csv predicted_ent
 streamlit run app.py
 ```
    
-Upload sample1.csv conatining symptom_text, age, severity columns. (Check for sample in data folder)
+Upload sample1.csv conatining `symptom_text`, `age`, `severity columns`. (Check for sample in `data` folder in this repo)
