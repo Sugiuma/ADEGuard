@@ -99,7 +99,7 @@ The pipeline was integrated into a **Streamlit app** with:
 
 
 
-# Streamlit FLow**
+# **Streamlit FLow**
 
 ## **1. Overview**
 
