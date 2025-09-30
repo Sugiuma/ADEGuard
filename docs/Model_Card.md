@@ -2,8 +2,11 @@
 # **ADEGuard BioBERT NER Model Card**
 
 **Model Name:** ADEGuard-BioBERT-NER
+
 **Version:** 1.0
+
 **Authors / Maintainers:** Suganya G/CureviaAI
+
 **Model Type:** Token classification (NER) based on BioBERT
 
 ---
