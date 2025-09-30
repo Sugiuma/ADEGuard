@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 2a. Update your model_path in config file.
 
-3.Run predctions
+3.Run predictions
 
 ```bash
 python inference.py
