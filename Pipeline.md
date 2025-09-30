@@ -88,7 +88,7 @@ The pipeline was integrated into a **Streamlit app** with:
 
 ## **9. Prediction on New Data**
 
-* **CSV Upload:** Users can upload raw narrative + structured fields.
+* **CSV Upload:** Users can upload raw narrative.
 * Pipeline automatically:
 
   1. Runs NER → extract ADE/DRUG spans.
@@ -99,7 +99,7 @@ The pipeline was integrated into a **Streamlit app** with:
 
 
 
-# **ADEGuard – Streamlit-Based ADE Analysis Pipeline**
+# Streamlit FLow**
 
 ## **1. Overview**
 
@@ -213,19 +213,4 @@ The Streamlit dashboard serves as an **interactive interface** for ADEGuard, all
   * Age group
 * Users can **download the post-processed dataset** for further analysis or reporting.
 
----
 
-## **11. Pipeline Summary**
-
-1. Upload CSV → validate columns
-2. Assign age groups
-3. Run NER extraction with optional BioBERT
-4. Assign severity labels
-5. Generate embeddings and cluster ADE/DRUG entities
-6. Reduce dimensions for visualization (t-SNE)
-7. Display interactive cluster plots (severity, age)
-8. Highlight tokens for individual narratives
-9. Show table of post-processed data with option to download
-
-
-Do you want me to do that?
