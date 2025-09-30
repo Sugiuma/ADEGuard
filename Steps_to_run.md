@@ -1,4 +1,4 @@
-## ** How to Run**
+## **How to Run**
 
 Download the model from:
 https://drive.google.com/drive/folders/1pnQJfxpMILCO2r7FUH3wotmoJ6Y2vE4F?usp=sharing
@@ -36,3 +36,13 @@ streamlit run app.py
 ```
    
 Upload sample1.csv conatining `symptom_text`, `age`, `severity columns`. (Check for sample in `data` folder in this repo)
+
+**Model Performance Reports**
+[Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
+[Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
+[Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
+
+[Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Model_Card.md)
+[Project pipeline](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Pipeline.md)
+
+
