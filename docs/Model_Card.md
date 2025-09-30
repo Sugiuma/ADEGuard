@@ -60,12 +60,3 @@
 
 ---
 
-## **Contact**
-
-* CureviaAI | [support@cureviaai.com](mailto:support@cureviaai.com)
-
----
-
-If you want, I can also **make a one-slide PPT version of this Model Card** suitable for portfolio presentation.
-
-Do you want me to do that?
