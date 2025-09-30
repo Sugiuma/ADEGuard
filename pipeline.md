@@ -1,3 +1,123 @@
+Perfect — you want the **pipeline explained step by step** starting from VAERS data prep → weak labels → imbalance handling → clustering → UI → prediction. I’ll write this like a **methods section in your project report / portfolio** so it’s structured and professional.
+
+---
+
+# **ADEGuard – Data & Methodology Workflow**
+
+## **1. Data Preparation**
+
+* **Source Data:** VAERS dataset (Vaccine Adverse Event Reporting System).
+* **Subset Selection:** Combined all reports, then **filtered COVID-19 vaccine–related cases** as the primary working dataset (largest, most recent, most relevant).
+* **Stratified Sampling:** To avoid skew (COVID dominated recent years), we sampled across:
+
+  * Vaccine type
+  * Age groups (pediatric, adult, elderly)
+  * Outcomes (ER visits, hospitalization, death)
+    → Ensured a **balanced representative mix** of ADEs.
+
+---
+
+## **2. Annotation (Gold Data Creation)**
+
+* Used **Label Studio** to annotate a stratified subset.
+* Task: Mark **ADE spans** (symptom phrases) and **DRUG spans** (medications/vaccines).
+* Output: BIO tagging scheme (B-ADE, I-ADE, B-DRUG, I-DRUG, O).
+* This gold data was used for **BioBERT fine-tuning** and evaluation.
+
+---
+
+## **3. Weak Supervision**
+
+* VAERS has **structured symptom fields** (`SYMPTOM1` … `SYMPTOM5`).
+* We converted these fields into **weak labels**:
+
+  * If `SYMPTOM1` = “Headache” → label narrative text spans containing “headache” as ADE.
+  * If drug/vaccine name is recorded, map to `DRUG` entity.
+* These weak labels were combined with gold annotations for **semi-supervised training**.
+
+---
+
+## **4. Handling Imbalanced Data**
+
+* **Problem:** Severe ADEs (death, hospitalization) are much rarer than mild ones.
+* **Solution:**
+
+  * Used **class weights** in severity classifier loss function to penalize underrepresented classes more.
+  * Stratified sampling ensured minority classes appear in both training & validation.
+  * Evaluated with **macro-averaged metrics** (balanced across classes).
+
+---
+
+## **5. ADE Extraction (NER)**
+
+* Fine-tuned **BioBERT** on annotated + weak-labeled data.
+* Output: ADE spans and DRUG spans from narratives.
+* Post-processing merged subword tokens for clean phrase-level ADE detection.
+
+---
+
+## **6. Clustering**
+
+* Extracted embeddings from **Sentence-BERT** for symptom spans.
+* Applied **UMAP / t-SNE** for dimensionality reduction.
+* Used **HDBSCAN** to discover clusters (no pre-defined k).
+* **Modifier-aware & Age-specific:**
+
+  * Severity words (“mild”, “severe”) included in embeddings.
+  * Age-stratified clustering revealed differences (e.g., “seizure” clusters in children vs. “chest pain” in elderly).
+
+---
+
+## **7. Severity Classification**
+
+* Multi-input model combining:
+
+  * **Narrative embeddings** (BioBERT CLS token).
+  * **Structured fields** (hospitalization flag, ER visit, death outcome).
+  * **Patient metadata** (age, gender).
+* **Ensemble severity classifier** outputs: Mild / Moderate / Severe.
+* **Explainability:** Used **SHAP** to highlight which tokens/fields influenced severity predictions.
+
+---
+
+## **8. Streamlit UI (ADEGuard Dashboard)**
+
+The pipeline was integrated into a **Streamlit app** with:
+
+* **Token Highlighting:** ADE/DRUG spans color-coded in narrative text.
+* **Cluster Visualization:** Interactive 2D plots (UMAP/t-SNE), with **hover text** showing ADE, age group, severity.
+* **Severity Prediction:** Displays predicted label with structured metadata context.
+* **Explainability:** SHAP force plots & bar charts for case-level auditability.
+
+---
+
+## **9. Prediction on New Data**
+
+* **CSV Upload:** Users can upload raw narrative + structured fields.
+* Pipeline automatically:
+
+  1. Runs NER → extract ADE/DRUG spans.
+  2. Classifies severity.
+  3. Places symptoms into clusters.
+  4. Visualizes results in UI (highlighted tokens, cluster map, severity tag).
+* Designed to scale for **batch processing** of new safety reports.
+
+---
+
+## **10. Summary**
+
+This workflow ensures ADEGuard is:
+
+* **Data-driven** (gold + weak labels).
+* **Robust** (imbalance handling, clustering).
+* **Explainable** (token highlights, SHAP).
+* **Practical** (real-time predictions via CSV upload + UI).
+
+---
+
+⚡This reads like a **complete methods pipeline** — clear from VAERS preprocessing to explainable predictions.
+
+👉 Do you want me to also **add this workflow into the PPT deck** as a **“Methods Slide (Pipeline Flow)” with a diagram** showing data prep → NER → clustering → severity → UI → CSV upload?
 
 # **ADEGuard – Streamlit-Based ADE Analysis Pipeline**
 
