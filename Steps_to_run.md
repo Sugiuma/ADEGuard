@@ -12,6 +12,8 @@ https://drive.google.com/drive/folders/1pnQJfxpMILCO2r7FUH3wotmoJ6Y2vE4F?usp=sha
 ```bash
 pip install -r requirements.txt
 ```
+2a. Update your model_path in config file.
+
 3.Run predctions
 
 ```bash
