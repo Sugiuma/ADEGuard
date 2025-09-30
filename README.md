@@ -18,7 +18,7 @@ https://drive.google.com/drive/folders/1pnQJfxpMILCO2r7FUH3wotmoJ6Y2vE4F?usp=sha
 
 
 ## **Steps**
-1. Set up virtual environment.
+1. Clone the repo & Set up virtual environment.
    
 2. Ensure dependencies are installed:
 
