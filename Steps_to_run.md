@@ -1,3 +1,8 @@
+https://drive.google.com/drive/folders/1pnQJfxpMILCO2r7FUH3wotmoJ6Y2vE4F?usp=sharing
+
+
+
+
 Perfect! Here’s a **ready-to-use `inference.py`** that reads a CSV (`input.csv`) with a column `symptom_text`, runs BioBERT NER, post-processes entities, and outputs a CSV (`predicted_entities.csv`) with predicted ADE and DRUG columns.
 
 ---
