@@ -39,10 +39,13 @@ Upload sample1.csv conatining `symptom_text`, `age`, `severity columns`. (Check 
 
 **Model Performance Reports**
 [Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
+
 [Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
+
 [Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
 
 [Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Model_Card.md)
+
 [Project pipeline](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Pipeline.md)
 
 
