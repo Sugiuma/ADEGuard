@@ -104,23 +104,18 @@ Absolutely! We can **simplify and consolidate** the diagram so it’s more compa
 
 ```mermaid
 flowchart TD
-
 A[Raw VAERS Reports] --> B[BioBERT NER: Extract ADE/Drug Spans]
-
 %% Modifier & Age + Clustering
 B --> C[Modifier Detection & Age Bucketing]
 C --> D[Clustering: ADE Embeddings + Modifier + Age]
-
 %% Weak Labeling + Severity Classifier
 B --> E[Snorkel Weak Labeling]
 E --> F[BioBERT Severity Classifier]
 F --> G[Severity Predictions + SHAP Explainability]
-
 %% Streamlit UI
-B --> H[Streamlit: NER Highlights]
+B --> H[Streamlit Visualization Dashboard]
 D --> H
 G --> H
-H --> I[Visualization Dashboard]
 ```
 
 ### ✅ **What changed**
