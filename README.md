@@ -100,4 +100,40 @@ If you want, I can **also add color/emoji hints** in Mermaid to visually disting
 
 Do you want me to do that?
 
+Absolutely! We can **simplify and consolidate** the diagram so it’s more compact while still showing the key flows:
+
+```mermaid
+flowchart TD
+
+A[Raw VAERS Reports] --> B[BioBERT NER: Extract ADE/Drug Spans]
+
+%% Modifier & Age + Clustering
+B --> C[Modifier Detection & Age Bucketing]
+C --> D[Clustering: ADE Embeddings + Modifier + Age]
+
+%% Weak Labeling + Severity Classifier
+B --> E[Snorkel Weak Labeling]
+E --> F[BioBERT Severity Classifier]
+F --> G[Severity Predictions + SHAP Explainability]
+
+%% Streamlit UI
+B --> H[Streamlit: NER Highlights]
+D --> H
+G --> H
+H --> I[Visualization Dashboard]
+```
+
+### ✅ **What changed**
+
+1. **Merged modifier detection & age extraction** into one step.
+2. **Merged clustering features** into a single box.
+3. **Merged severity classifier & explainability** into one simplified flow.
+4. Keeps **NER** as the central starting point and **Streamlit UI** as the integration point.
+
+---
+
+If you want, I can also **draw a “tab-focused” version** showing **NER Tab, Clustering Tab, Severity Tab, SHAP Tab** directly, which is even cleaner for a Streamlit layout.
+
+Do you want me to do that next?
+
 
