@@ -109,13 +109,12 @@ A[Raw VAERS Reports] --> B[BioBERT NER: Extract ADE/Drug Spans]
 B --> C[Modifier Detection & Age Bucketing]
 C --> D[Clustering: ADE Embeddings + Modifier + Age]
 %% Weak Labeling + Severity Classifier
-B --> E[Snorkel Weak Labeling]
-E --> F[BioBERT Severity Classifier]
-F --> G[Severity Predictions + SHAP Explainability]
+B --> E[Snorkel Weak Labeling - BioBERT Severity Classifier]
+E--> F[Severity Predictions + SHAP Explainability]
 %% Streamlit UI
 B --> H[Streamlit Visualization Dashboard]
 D --> H
-G --> H
+F --> H
 ```
 
 ### ✅ **What changed**
