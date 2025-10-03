@@ -51,5 +51,53 @@ streamlit run app.py
 Upload sample1.csv conatining `symptom_text`, `age`, `severity columns`. (Check for sample in `data` folder in this repo)
 
 
+Perfect! Here's a **Streamlit tab-focused Mermaid.js flow** that’s compact and maps directly to your UI tabs:
+
+```mermaid
+flowchart TD
+
+A[Raw VAERS Reports] --> B[BioBERT NER: Extract ADE/Drug Spans]
+
+%% NER Tab
+B --> C[NER Tab: Token-level Highlights]
+
+%% Clustering Tab
+B --> D[Modifier Detection & Age Bucketing]
+D --> E[Clustering: ADE Embeddings + Modifier + Age]
+E --> F[Clustering Tab: Interactive Plots]
+
+%% Severity Tab
+B --> G[Snorkel Weak Labeling]
+G --> H[BioBERT Severity Classifier]
+H --> I[Severity Tab: Predictions + Probabilities]
+
+%% Explainability Tab
+I --> J[SHAP / LIME Explanations]
+J --> K[Explainability Tab]
+
+%% Streamlit Dashboard Integration
+C --> L[Streamlit Dashboard]
+F --> L
+I --> L
+K --> L
+```
+
+### **How it maps to your Streamlit app**
+
+| Tab                    | Description                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| **NER Tab**            | Show extracted ADE/Drug spans token-by-token.                                               |
+| **Clustering Tab**     | Show modifier-aware + age-aware ADE clusters with interactive plots.                        |
+| **Severity Tab**       | Show predicted severity (Severe/Moderate/Mild) from BioBERT trained on Snorkel weak labels. |
+| **Explainability Tab** | SHAP/LIME explanations for why severity was predicted.                                      |
+| **Dashboard**          | Combines all tabs for the full visualization experience.                                    |
+
+---
+
+This keeps your flow **compact, UI-oriented**, and clearly separates **clustering vs severity vs explainability**, while still showing NER as the common starting point.
+
+If you want, I can **also add color/emoji hints** in Mermaid to visually distinguish **unsupervised (clustering) vs supervised (classifier) paths**, which makes it even easier to read.
+
+Do you want me to do that?
 
 
