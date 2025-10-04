@@ -124,10 +124,101 @@ F --> H
 3. **Merged severity classifier & explainability** into one simplified flow.
 4. Keeps **NER** as the central starting point and **Streamlit UI** as the integration point.
 
+
 ---
 
 If you want, I can also **draw a “tab-focused” version** showing **NER Tab, Clustering Tab, Severity Tab, SHAP Tab** directly, which is even cleaner for a Streamlit layout.
 
 Do you want me to do that next?
 
+Excellent question — and yes, **your current model fits this stage perfectly** ✅
+Let’s unpack why in the context of your ADEGuard pipeline.
+
+---
+
+## 🧩 Step: “Label Severity Levels”
+
+> **Goal:** Assign a *final severity label* to each case using a hybrid of:
+>
+> * Rules (from VAERS structured fields, like HOSPITAL or DIED)
+> * Manual / gold labels (from curated annotations, if available)
+> * ML-based classifier (BioBERT fine-tuned on weak or gold labels)
+
+---
+
+### 💡 Your current model’s role
+
+You already have:
+
+* A **Snorkel-based weak labeling layer** → creates `weak_label_id` (Severe/Mild)
+* A **BioBERT classifier fine-tuned** on those weak labels → learns to infer severity directly from **symptom text**
+
+✅ So your model **is exactly the “BioBERT classification” component** mentioned in that step.
+
+It’s the machine-learning leg of the hybrid labeling system.
+
+---
+
+### ⚙️ Here’s how the pieces fit
+
+| Source                 | Example Signal                               | Strength                             | Component in Your Pipeline |
+| ---------------------- | -------------------------------------------- | ------------------------------------ | -------------------------- |
+| **Rule-based**         | `DIED = Y`, `L_THREAT = Y`                   | High precision, low recall           | Snorkel labeling functions |
+| **Manual labels**      | Hand-verified severity tags                  | High precision, low coverage         | Optional (Label Studio)    |
+| **BioBERT classifier** | “Patient developed severe headache” → Severe | Medium-high precision, generalizable | ✅ Your trained classifier  |
+
+The **final severity decision** can then be:
+
+```python
+if rule_based_label == "Severe":
+    final_label = "Severe"
+else:
+    final_label = classifier_prediction
+```
+
+or probabilistic:
+
+```python
+final_prob = 0.7 * clf_prob + 0.3 * rule_prob
+```
+
+---
+
+### 🧠 Why your model is good for this role
+
+* It’s **trained on text**, learning language patterns correlated with severity (e.g., “hospitalized”, “critical”, “unconscious”).
+* It’s **BioBERT**, so it understands medical terminology.
+* It’s **bootstrapped with Snorkel weak labels**, giving it grounding in structured field logic.
+
+Even if your weak labels came from rules, the classifier:
+
+* Learns richer **semantic cues** (beyond “severe” keyword)
+* Can **generalize** to unseen phrases (e.g., “intensive care”, “needed oxygen”)
+* Provides **probabilities**, which can help in hybrid logic or SHAP explainability.
+
+---
+
+### 🩺 Example of final severity adjudication flow
+
+```mermaid
+flowchart TD
+    A[VAERS Report] --> B[Weak Labeling (Snorkel)]
+    B --> C[Weak Label ID + Probability]
+    A --> D[BioBERT Severity Classifier]
+    D --> E[Classifier Probability]
+    C --> F[Hybrid Decision Logic]
+    E --> F
+    F --> G[Final Severity Label]
+```
+
+---
+
+✅ **Bottom line:**
+Yes — your **current BioBERT model is exactly what’s needed** for the
+“Label Severity Levels → BioBERT classification” part.
+It is the ML refinement layer that enhances rule-based severity determination.
+
+---
+
+Would you like me to show how to integrate your **BioBERT classifier + Snorkel weak labels** into a **hybrid adjudication function** (for your Streamlit tab “Severity”) — e.g., combining rule-based + classifier outputs dynamically?
 
