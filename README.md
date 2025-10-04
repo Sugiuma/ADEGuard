@@ -202,7 +202,7 @@ Even if your weak labels came from rules, the classifier:
 
 ```mermaid
 flowchart TD
-    A[VAERS Report] --> B[Weak Labeling (Snorkel)]
+    A[VAERS Report] --> B[Weak Labeling (-Snorkel-)]
     B --> C[Weak Label ID + Probability]
     A --> D[BioBERT Severity Classifier]
     D --> E[Classifier Probability]
