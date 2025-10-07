@@ -69,7 +69,6 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 |     2️⃣  | **Hybrid Severity** | Combines classifier output & rule-based fallback for determining modifiers for clustering |
 | 3️⃣| **Dimensionality Reduction**  | Apply t-SNE for 2D visual mapping of embeddings                             |
 |    4️⃣    | **K-Means Clustering**        | Group similar ADE cases based on textual similarity                         |
-
 |     5️⃣    | **Interactive Visualization** | Use Plotly scatter plot for exploration and insight discovery               |
 
 🟨 *Outcome:* Reveals hidden relationships between symptoms, drugs, and severity.
