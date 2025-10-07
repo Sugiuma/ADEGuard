@@ -1,4 +1,4 @@
-### 🧠 **BIOBERT NER Model Training**
+### **BIOBERT NER Model Training**
 
 | **Step** | **Component**                     | **Summary**                                                                                                                                                                       |
 | -------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -13,7 +13,7 @@
 This pipeline combines weak supervision, class balancing, and selective fine-tuning to adapt BioBERT efficiently for clinical NER, while dictionary-based post-processing ensures robust entity coverage.
 
 
-### ⚙️ **Severity Classifier Training (Snorkel Weak Supervision)**
+### **Severity Classifier Training (Snorkel Weak Supervision)**
 
 | **Step** | **Component**                  | **Summary**                                                                                                                                                                                                          |
 | -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -26,6 +26,45 @@ This pipeline combines weak supervision, class balancing, and selective fine-tun
 
 ✅ **In short:**
 Snorkel was used to automatically infer **severity levels** (Severe, Moderate, Mild) from mixed structured + unstructured data, creating **weakly supervised training data** for the classifier — a scalable alternative to manual labeling.
+
+
+###  **Named Entity Recognition (NER) Module**
+
+| Step | Process                       | Description                                                    |
+| ---- | ----------------------------- | -------------------------------------------------------------- |
+| 1    | **Input Loading**             | Upload CSV with `symptom_text` and `age`                       |
+| 2    | **Preprocessing**             | Group patients by age (Child, Young Adult, Middle Age, Senior) |
+| 3    | **Model Loading**             | Load fine-tuned **BioBERT NER** model                          |
+| 4    | **Tokenization & Prediction** | Split text → predict token labels (B/I-ADE, B/I-DRUG, O)       |
+| 5    | **Entity Merging**            | Combine sub-tokens into complete ADE/Drug phrases              |
+| 6    | **Visualization**             | Highlight ADE (red) and Drug (blue) tokens in Streamlit        |
+| 7    | **Export**                    | Save enriched CSV with extracted entities                      |
+
+---
+
+###  **Severity Classification + Explainability**
+
+| Step | Process                      | Description                                                       |
+| ---- | ---------------------------- | ----------------------------------------------------------------- |
+| 1    | **Model Loading**            | Load transformer-based severity classifier (Severe/Moderate/Mild) |
+| 2    | **Prediction**               | For each symptom, predict severity and confidence scores          |
+| 3    | **Hybrid Labeling**          | Apply rule-based logic for missing or ambiguous labels            |
+| 4    | **Explainability (SHAP)**    | Compute SHAP values for each token to explain model’s decision    |
+| 5    | **Token-Level Highlights**   | Display color-coded tokens based on importance contribution       |
+| 6    | **Feature Importance Chart** | Bar chart showing key symptom words influencing severity          |
+
+---
+
+###  **Clustering & Visuals**
+
+| Step | Process                      | Description                                                                     |
+| ---- | ---------------------------- | ------------------------------------------------------------------------------- |
+| 1    | **Sentence Embeddings**      | Convert each record (ADE + Drug + Severity) to vector using SentenceTransformer |
+| 2    | **Dimensionality Reduction** | Apply **t-SNE** for 2D visualization of embeddings                              |
+| 3    | **K-Means Clustering**       | Group similar ADE reports into clusters                                         |
+| 4    | **Cluster Interpretation**   | Analyze grouping by **Severity**, **Age Group**, and **Drugs**                  |
+| 5    | **Visualization**            | Interactive 2D scatter plots using **Plotly** for clinical insights             |
+
 
 
 ### 🩺 **Clinical Insights Dashboard (Streamlit UI)**
@@ -41,10 +80,6 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 
 ✅ **In short:**
 The **Clinical ADE Insights Dashboard** transforms AI model outputs into **actionable clinical intelligence**, allowing doctors and researchers to visually explore severity trends, ADE frequency, and patient demographics — bridging the gap between AI predictions and clinical interpretation.
-
-Perfect! Here’s a clean, PowerPoint-ready summary of your classifier training as a table and chart:
-
----
 
 ### **Classifier Training Summary**
 
