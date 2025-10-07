@@ -111,6 +111,22 @@ st.dataframe(df[["symptom_text", "age_group", "ADE", "DRUG"]].head(10))
 ```
 
 * Shows extracted ADEs and drugs for quick inspection.
+Perfect — that’s an excellent **post-processing enhancement** to highlight in your presentation/report.
+Here’s how you can summarize it in one clean bullet point (for your **NER module table or PowerPoint slide**):
+
+---
+
+### 🧩 **Post-Processing (NER) Summary**
+
+> **Dictionary-based entity correction and cleaning:**
+> After initial NER extraction, a **custom post-processing layer** normalizes text, then cross-checks it against curated dictionaries for **known DRUG and ADE terms** (e.g., Pfizer, fever, swelling).
+> This ensures **missed or fragmented entities are recovered** and **spurious ones removed**, improving precision and recall.
+
+---
+
+If you want a **single concise PowerPoint-style line**, use:
+
+> **Post-processing:** Added rule-based dictionary matching and text cleaning to recover missed ADE/Drug entities and refine NER output quality.
 
 ### 🔹 Token-level Highlight
 
