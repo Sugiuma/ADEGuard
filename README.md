@@ -225,23 +225,23 @@ Got it! We can condense your pipeline into a **simpler, compact Mermaid flow** s
 flowchart TD
     A[Upload CSV: symptom_text + Age <br> Preprocessing & Age Grouping]
 
-    A --> C[NER: Extract ADE & Drug Entities]
+    A --> C[NER: BioBERT Extract ADE & Drug Entities]
 
-    C --> D[Severity Classifier + Rule-Based Fallback <br> Mild / Moderate / Severe ]
+    C --> D[BioBERT Severity Classifier + SHAP Explaination]
 
     C --> E[SentenceTransformer Embeddings]
     D --> E
 
-    E --> F[K-Means Clustering + t-SNE <br> Interactive Cluster Plots: ADE/Drug - Severity, Age]
+    E --> F[K-Means Clustering + t-SNE <br> Interactive Cluster Plots]
    
 
     style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#ffc,stroke:#333,stroke-width:2px
+ 
     style C fill:#bbf,stroke:#333,stroke-width:2px
     style D fill:#bfb,stroke:#333,stroke-width:2px
     style E fill:#fbf,stroke:#333,stroke-width:2px
     style F fill:#ffb,stroke:#333,stroke-width:2px
-    style G fill:#ff9,stroke:#333,stroke-width:2px
+    
 ```
 
 ### 🔹 Condensed explanation:
