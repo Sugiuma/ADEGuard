@@ -6,42 +6,49 @@ Excellent — here are your **last three modules (BioBERT Training, Weak Label C
 
 | **Step** | **Component**                     | **Summary**                                                                                                                                                                       |
 | -------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1️⃣      | **Gold Data Creation**            | Manually annotated ADE and DRUG entities from clinical narratives to build a high-quality labeled dataset.                                                                        |
-| 2️⃣      | **Weak Supervision Augmentation** | Integrated additional weakly labeled data (e.g., from Snorkel-generated labels) to expand training coverage.                                                                      |
+| 1️⃣      | **Gold Data Creation**            | Manually annotated ADE and DRUG entities from clinical narratives to build a high-quality labeled dataset using Label Studio.                                                                        |
+| 2️⃣      | **Weak Supervision Augmentation** | Integrated additional weakly labeled data to expand training coverage.                                                                      |
 | 3️⃣      | **Class Weight Balancing**        | Computed **class weights** to counter label imbalance — ensuring the model learns equally across frequent and rare entity types.                                                  |
-| 4️⃣      | **Layer Freezing Strategy**       | Used **progressive fine-tuning**: froze lower layers of BioBERT and **unfroze last 4 encoder layers** + classifier head to retain domain knowledge while adapting to ADE context. |
-| 5️⃣      | **Post-Processing Dictionary**    | Added domain dictionary for normalization and missed-entity recovery after model inference, ensuring coverage for known ADE/Drug names.                                           |
+| 4️⃣      | **Layer Freezing Strategy (Transfer Learning)**       | Used **progressive fine-tuning**: froze lower layers of BioBERT and **unfroze last 4 encoder layers** + classifier head to retain domain knowledge while adapting to ADE context. |
+| 5️⃣ | **Training & Validation** | 
+Fine-tuned BioBERT on gold + weak data with weighted loss and token-level evaluation (precision, recall, F1).|
+| 6️⃣   | **Post-Processing Dictionary**    | Added domain dictionary for normalization and missed-entity recovery after model inference, ensuring coverage for known ADE/Drug names.                                           |
 
-🟢 *Advantage:* Combines domain adaptation with efficiency — faster convergence, reduced overfitting, and improved generalization to unseen ADE mentions.
+✅ In short:
+This pipeline combines weak supervision, class balancing, and selective fine-tuning to adapt BioBERT efficiently for clinical NER, while dictionary-based post-processing ensures robust entity coverage.
 
----
 
-### ⚙️ **Weak Label Classifier (Snorkel Label Model)**
+### ⚙️ **Severity Classifier Training (Snorkel Weak Supervision)**
 
-| **Step** | **Component**                | **Summary**                                                                                                                                         |
-| -------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1️⃣      | **Purpose**                  | Automatically label ADE severity (Severe / Moderate / Mild) using rule-based **labeling functions** instead of full manual annotation.              |
-| 2️⃣      | **Labeling Functions (LFs)** | Defined functions on clinical fields (`DIED`, `HOSPITAL`, `SYMPTOM_TEXT`, etc.) capturing severity indicators using both metadata and textual cues. |
-| 3️⃣      | **Label Model Training**     | Combined multiple noisy signals with **Snorkel’s LabelModel** to estimate label accuracy and produce probabilistic weak labels.                     |
-| 4️⃣      | **Weak Label Generation**    | Generated **probabilistic and hard labels** (`weak_label_prob_*`, `weak_label`) for training a downstream severity classifier.                      |
-| 5️⃣      | **Data Export**              | Saved enriched dataset with extracted entities and weak labels for classifier fine-tuning and visualization.                                        |
-
-🟢 *Advantage:* Reduces manual labeling cost while providing reliable pseudo-labels for supervised model training.
-
----
-
-### 🩺 **Clinical ADE Insights Dashboard**
-
-| **Step** | **Component**               | **Summary**                                                                                                               |
-| -------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| 1️⃣      | **Purpose**                 | Interactive dashboard for clinicians to explore AI-classified ADE cases by **drug, symptom, age, and severity**.          |
-| 2️⃣      | **Data Preparation**        | “Exploded” multi-entity fields to analyze each ADE–drug pair distinctly for visualization and summarization.              |
-| 3️⃣      | **Filtering & Exploration** | Added filters for **Drug**, **ADE**, and **Cluster** for targeted analysis of case subsets.                               |
-| 4️⃣      | **Visualization**           | Displayed **bar charts** for severity and age group distributions; **scatter plots** from clusters for pattern discovery. |
-| 5️⃣      | **Summary & Export**        | Generated grouped **clinical summaries** and provided **CSV download** options for filtered insights.                     |
-
-🟢 *Advantage:* Converts raw model predictions into **clinically interpretable insights**, aiding pharmacovigilance and risk monitoring.
+| **Step** | **Component**                  | **Summary**                                                                                                                                                                                                          |
+| -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1️⃣      | **Input Data**                 | Used ADE narratives enriched with extracted **ADE/DRUG entities** from NER step as input.                                                                                                                            |
+| 2️⃣      | **Labeling Functions (LFs)**   | Defined **rule-based labeling functions** on structured fields (`DIED`, `HOSPITAL`, `L_THREAT`, `DISABLE`) and unstructured text (`SYMPTOM_TEXT`). Each LF votes for a class: **Severe**, **Moderate**, or **Mild**. |
+| 3️⃣      | **Weak Label Generation**      | Combined multiple LF outputs using **Snorkel’s LabelModel**, which estimates LF accuracies and correlations to produce **probabilistic weak labels**.                                                                |
+| 4️⃣      | **Label Aggregation**          | Converted Snorkel probabilities into **final weak labels** (`weak_label_id`, `weak_label`) and appended them to the dataset.                                                                                         |
+| 5️⃣      | **Training Data Creation**     | Produced a unified dataset (`dataset_with_entities_and_weaklabels.csv`) with **entity spans + weak severity labels** for training the downstream **severity classifier**.                                            |
+| 6️⃣      | **Integration for Classifier** | These weak labels served as **pseudo-gold labels** to train a **BioBERT-based severity classifier**, reducing manual annotation effort.                                                                              |
 
 ---
 
-Would you like me to now combine these three into a **single PowerPoint slide layout** (with uniform blue/white table design and icons for each module)?
+✅ **In short:**
+Snorkel was used to automatically infer **severity levels** (Severe, Moderate, Mild) from mixed structured + unstructured data, creating **weakly supervised training data** for the classifier — a scalable alternative to manual labeling.
+
+
+### 🩺 **Clinical Insights Dashboard (Streamlit UI)**
+
+| **Step** | **Component**                   | **Summary**                                                                                                                                                                      |
+| -------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1️⃣      | **Purpose**                     | Provides clinicians with an **interactive dashboard** to explore AI-classified **adverse drug events (ADEs)** across drugs, symptoms, severity levels, and patient demographics. |
+| 2️⃣      | **Data Preparation**            | Expanded list columns (`DRUG`, `ADE`) to ensure each ADE–drug pair is analyzed individually for accurate aggregation and visualization.                             |
+| 3️⃣      | **Filtering**                   | Added **dynamic filters** for **Drug**, **ADE**, and **Cluster** to explore focused subsets of the dataset interactively.                                                        |
+| 4️⃣      | **Visualization**               | Displayed multiple **bar charts** showing the **distribution of severity** (`pred_label`) and **age groups**, enabling trend analysis across demographics.                       |
+| 5️⃣      | **Clinical Summary Generation** | Computed a grouped **clinical summary table** (`DRUG`, `ADE`, `count`) to summarize frequent ADE–drug associations.                                                              |
+| 6️⃣      | **Data Export**                 | Enabled **CSV downloads** (Filtered Cases & Clinical Summary) from the sidebar for further medical review and audit.                                                             |
+
+---
+
+✅ **In short:**
+The **Clinical ADE Insights Dashboard** transforms AI model outputs into **actionable clinical intelligence**, allowing doctors and researchers to visually explore severity trends, ADE frequency, and patient demographics — bridging the gap between AI predictions and clinical interpretation.
+
+
