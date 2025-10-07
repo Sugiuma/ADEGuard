@@ -234,14 +234,7 @@ flowchart TD
 
     E --> F[K-Means Clustering + t-SNE <br> Interactive Cluster Plots]
    
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
- 
-    style C fill:#bbf,stroke:#333,stroke-width:2px
-    style D fill:#bfb,stroke:#333,stroke-width:2px
-    style E fill:#fbf,stroke:#333,stroke-width:2px
-    style F fill:#ffb,stroke:#333,stroke-width:2px
-    
+   
 ```
 
 ### 🔹 Condensed explanation:
