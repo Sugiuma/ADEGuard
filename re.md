@@ -28,43 +28,48 @@ This pipeline combines weak supervision, class balancing, and selective fine-tun
 Snorkel was used to automatically infer **severity levels** (Severe, Moderate, Mild) from mixed structured + unstructured data, creating **weakly supervised training data** for the classifier — a scalable alternative to manual labeling.
 
 
-###  **Named Entity Recognition (NER) Module**
+## **Named Entity Recognition (NER)**
 
-| Step | Process                       | Description                                                    |
-| ---- | ----------------------------- | -------------------------------------------------------------- |
-| 1    | **Input Loading**             | Upload CSV with `symptom_text` and `age`                       |
-| 2    | **Preprocessing**             | Group patients by age (Child, Young Adult, Middle Age, Senior) |
-| 3    | **Model Loading**             | Load fine-tuned **BioBERT NER** model                          |
-| 4    | **Tokenization & Prediction** | Split text → predict token labels (B/I-ADE, B/I-DRUG, O)       |
-| 5    | **Entity Merging**            | Combine sub-tokens into complete ADE/Drug phrases              |
-| 6    | **Visualization**             | Highlight ADE (red) and Drug (blue) tokens in Streamlit        |
-| 7    | **Export**                    | Save enriched CSV with extracted entities                      |
+| **Step** | **Task**                    | **Purpose / Outcome**                                              |
+| :------: | --------------------------- | ------------------------------------------------------------------ |
+|     1    | **Input Loading**           | Upload CSV containing symptom text and age                         |
+|     2    | **Age Grouping**            | Categorize patients into Child / Young Adult / Middle Age / Senior |
+|     3    | **Load BioBERT NER Model**  | Initialize token classification model for ADE & Drug detection     |
+|     4    | **Tokenization & Labeling** | Predict BIO tags for each token (B/I-ADE, B/I-DRUG, O)             |
+|     5    | **Entity Assembly**         | Merge sub-tokens to form full ADE or Drug phrases                  |
+|     6    | **Visualization**           | Highlight detected entities (red = ADE, blue = Drug)               |
+|     7    | **Export**                  | Save processed dataset with extracted entities                     |
 
----
-
-###  **Severity Classification + Explainability**
-
-| Step | Process                      | Description                                                       |
-| ---- | ---------------------------- | ----------------------------------------------------------------- |
-| 1    | **Model Loading**            | Load transformer-based severity classifier (Severe/Moderate/Mild) |
-| 2    | **Prediction**               | For each symptom, predict severity and confidence scores          |
-| 3    | **Hybrid Labeling**          | Apply rule-based logic for missing or ambiguous labels            |
-| 4    | **Explainability (SHAP)**    | Compute SHAP values for each token to explain model’s decision    |
-| 5    | **Token-Level Highlights**   | Display color-coded tokens based on importance contribution       |
-| 6    | **Feature Importance Chart** | Bar chart showing key symptom words influencing severity          |
+🟩 *Outcome:* Extracts clean ADE and Drug entities for downstream analysis.
 
 ---
 
-###  **Clustering & Visuals**
+## **Severity Classification + Explainability**
 
-| Step | Process                      | Description                                                                     |
-| ---- | ---------------------------- | ------------------------------------------------------------------------------- |
-| 1    | **Sentence Embeddings**      | Convert each record (ADE + Drug + Severity) to vector using SentenceTransformer |
-| 2    | **Dimensionality Reduction** | Apply **t-SNE** for 2D visualization of embeddings                              |
-| 3    | **K-Means Clustering**       | Group similar ADE reports into clusters                                         |
-| 4    | **Cluster Interpretation**   | Analyze grouping by **Severity**, **Age Group**, and **Drugs**                  |
-| 5    | **Visualization**            | Interactive 2D scatter plots using **Plotly** for clinical insights             |
+| **Step** | **Task**                | **Purpose / Outcome**                                          |
+| :------: | ----------------------- | -------------------------------------------------------------- |
+|     1    | **Load Classifier**     | Load fine-tuned text classification model                      |
+|     2    | **Predict Severity**    | Output severity levels (Severe / Moderate / Mild)              |
+|     3    | **Hybrid Logic**        | Use weak labels or rule-based fallback for missing predictions |
+|     4    | **SHAP Explainability** | Identify which words drive the model’s severity decision       |
+|     5    | **Token Highlights**    | Visualize important symptom words in color-coded text          |
+|     6    | **Feature Importance**  | Show bar chart of word influence scores                        |
 
+🟦 *Outcome:* Provides both automated severity scoring and transparent, interpretable results.
+
+---
+
+## ** Clustering & Insights Dashboard**
+
+| **Step** | **Task**                      | **Purpose / Outcome**                                                       |
+| :------: | ----------------------------- | --------------------------------------------------------------------------- |
+|     1    | **Sentence Embedding**        | Convert each ADE record into numerical representation (SentenceTransformer) |
+|     2    | **Dimensionality Reduction**  | Apply t-SNE for 2D visual mapping of embeddings                             |
+|     3    | **K-Means Clustering**        | Group similar ADE cases based on textual similarity                         |
+|     4    | **Cluster Analysis**          | Examine patterns by Severity, Drug type, and Age Group                      |
+|     5    | **Interactive Visualization** | Use Plotly scatter plot for exploration and insight discovery               |
+
+🟨 *Outcome:* Reveals hidden relationships between symptoms, drugs, and severity.
 
 
 ### 🩺 **Clinical Insights Dashboard (Streamlit UI)**
