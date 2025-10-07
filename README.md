@@ -219,76 +219,43 @@ Yes — your **current BioBERT model is exactly what’s needed** for the
 It is the ML refinement layer that enhances rule-based severity determination.
 
 ---
-
-Would you like me to show how to integrate your **BioBERT classifier + Snorkel weak labels** into a **hybrid adjudication function** (for your Streamlit tab “Severity”) — e.g., combining rule-based + classifier outputs dynamically?
-
-Perfect! Here’s a **compact Mermaid diagram** showing all three main tabs/modules of ADEGuard in a single view, suitable for a presentation slide:
+Got it! We can condense your pipeline into a **simpler, compact Mermaid flow** showing only the essential steps: input → NER → severity (hybrid classifier + rule-based) → embeddings → clustering → visualization. Here’s a clean version suitable for a slide:
 
 ```mermaid
 flowchart TD
-    %% Input
     A[Upload CSV: symptom_text + Age] --> B[Preprocessing & Age Grouping]
 
-    %% Tab 1: NER
-    B --> C[Tab 1: NER]
-    C --> C1[BIOBERT Token Classification]
-    C1 --> C2[Extract ADE & Drug Entities]
-    C2 --> C3[Token-Level Highlight Visualization]
+    B --> C[NER: Extract ADE & Drug Entities]
 
-    %% Tab 2: Severity + SHAP
-    B --> D[Tab 2: Severity Prediction & Explainability]
-    D --> D1[Transformer-Based Severity Classifier]
+    C --> D[Hybrid Severity]
+    D --> D1[Transformer Classifier + Rule-Based Fallback]
     D1 --> D2[Predicted Severity: Mild / Moderate / Severe]
-    D2 --> D3[SHAP Explainability: Token Importance + Heatmap + Bar Chart]
 
-    %% Tab 3: Clustering
-    C2 --> E[Tab 3: Clustering]
-    E --> E1[SentenceTransformer Embeddings]
-    E1 --> E2[K-Means Clustering]
-    E2 --> E3[t-SNE Visualization]
-    E3 --> E4[Interactive Cluster Plots: Severity + Age + Entities]
+    C --> E[SentenceTransformer Embeddings]
+    D2 --> E
 
-    %% Styling for clarity
+    E --> F[K-Means Clustering + t-SNE]
+    F --> G[Interactive Cluster Plots: ADE/Drug, Severity, Age]
+
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style B fill:#ffc,stroke:#333,stroke-width:2px
     style C fill:#bbf,stroke:#333,stroke-width:2px
-    style C1 fill:#bbf,stroke:#333,stroke-width:1px
-    style C2 fill:#bbf,stroke:#333,stroke-width:1px
-    style C3 fill:#bbf,stroke:#333,stroke-width:1px
     style D fill:#bfb,stroke:#333,stroke-width:2px
-    style D1 fill:#bfb,stroke:#333,stroke-width:1px
-    style D2 fill:#bfb,stroke:#333,stroke-width:1px
-    style D3 fill:#bfb,stroke:#333,stroke-width:1px
     style E fill:#fbf,stroke:#333,stroke-width:2px
-    style E1 fill:#fbf,stroke:#333,stroke-width:1px
-    style E2 fill:#fbf,stroke:#333,stroke-width:1px
-    style E3 fill:#fbf,stroke:#333,stroke-width:1px
-    style E4 fill:#fbf,stroke:#333,stroke-width:1px
+    style F fill:#ffb,stroke:#333,stroke-width:2px
+    style G fill:#ff9,stroke:#333,stroke-width:2px
 ```
 
-### 🔹 Notes for the diagram:
+### 🔹 Condensed explanation:
 
-* **Three main tabs** are clearly separated:
+1. **Upload & Preprocess:** CSV input with symptom text and age → age groups
+2. **NER:** Extract ADE & drug entities using BioBERT
+3. **Hybrid Severity:** Combine transformer classifier with rule-based rules → assign severity
+4. **Embeddings:** Use SentenceTransformer to generate embeddings for clustering
+5. **Clustering & Visualization:** K-Means + t-SNE → interactive plots by severity, age, entities
 
-  * Tab 1 = NER
-  * Tab 2 = Severity + SHAP
-  * Tab 3 = Clustering
-* **Flow highlights dependencies**:
-
-  * NER output feeds into both Clustering and Severity analysis
-  * Severity analysis and SHAP are independent of clustering
-* **Colors** help differentiate modules:
-
-  * Input = pink
-  * Preprocessing = light yellow
-  * NER = light blue
-  * Severity + SHAP = green
-  * Clustering = purple
-
-This version is compact enough to show in a single slide while still capturing the full workflow.
+This version **removes all token-level highlight and intermediate steps**, focusing on the **core flow** for presentations.
 
 ---
 
-If you want, I can also make a **slide-ready “horizontal layout” Mermaid diagram** with arrows left-to-right instead of top-down, which often looks cleaner in presentations.
-
-Do you want me to do that too?
+If you want, I can also make a **one-line per box version** with **horizontal layout** that fits nicely on a slide. It’s even more concise for reporting/presentation purposes. Do you want me to do that?
