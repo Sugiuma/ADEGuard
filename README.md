@@ -225,7 +225,7 @@ Got it! We can condense your pipeline into a **simpler, compact Mermaid flow** s
 flowchart TD
     A[Upload CSV: symptom_text + Age <br> Preprocessing & Age Grouping]
 
-    B --> C[NER: Extract ADE & Drug Entities]
+    A --> C[NER: Extract ADE & Drug Entities]
 
     C --> D[Severity Classifier + Rule-Based Fallback <br> Mild / Moderate / Severe ]
 
