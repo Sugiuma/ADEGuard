@@ -61,7 +61,7 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 
 ---
 
-## ** Clustering & Insights Dashboard**
+## **Clustering & Visuals**
 
 | **Step** | **Task**                      | **Purpose / Outcome**                                                       |
 | :------: | ----------------------------- | --------------------------------------------------------------------------- |
