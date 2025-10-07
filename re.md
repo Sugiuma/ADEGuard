@@ -17,11 +17,11 @@ This pipeline combines weak supervision, class balancing, and selective fine-tun
 
 | **Step** | **Component**                  | **Summary**                                                                                                                                                                                                          |
 | -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1️⃣      | **Input Data**                 | Used ADE narratives enriched with extracted **ADE/DRUG entities** from NER step as input.                                                                                                                            |
+| 1️⃣      | **Input Data**                 | Used unstructured symptom_text and structured fields from VAERS dataset as input.                                                                                                                            |
 | 2️⃣      | **Labeling Functions (LFs)**   | Defined **rule-based labeling functions** on structured fields (`DIED`, `HOSPITAL`, `L_THREAT`, `DISABLE`) and unstructured text (`SYMPTOM_TEXT`). Each LF votes for a class: **Severe**, **Moderate**, or **Mild**. |
 | 3️⃣      | **Weak Label Generation**      | Combined multiple LF outputs using **Snorkel’s LabelModel**, which estimates LF accuracies and correlations to produce **probabilistic weak labels**.                                                                |
 | 4️⃣      | **Label Aggregation**          | Converted Snorkel probabilities into **final weak labels** (`weak_label_id`, `weak_label`) and appended them to the dataset.                                                                                         |
-| 5️⃣      | **Training Data Creation**     | Produced a unified dataset (`dataset_with_entities_and_weaklabels.csv`) with **entity spans + weak severity labels** for training the downstream **severity classifier**.                                            |
+| 5️⃣      | **Training Data Creation**     | Produced a unified dataset with **entity spans + weak severity labels** for training the downstream **severity classifier**.                                            |
 | 6️⃣      | **Integration for Classifier** | These weak labels served as **pseudo-gold labels** to train a **BioBERT-based severity classifier**, reducing manual annotation effort.                                                                              |
 
 ✅ **In short:**
