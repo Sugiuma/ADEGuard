@@ -37,10 +37,6 @@
 
 ## **Performance**
 
-* **Token-level NER metrics (VAERS validation subset):**
-
-  * **ADE F1-score:** ~0.88
-  * **DRUG F1-score:** ~0.91
 * **Entity-level accuracy:** Post-processing improved matching to known drug/ADE dictionaries.
 * **Clustering & downstream tasks:** Embeddings + clustering revealed age- and modifier-aware symptom patterns.
 
