@@ -14,8 +14,11 @@
 ## **How to Run**
 
 Download the model from:
-https://drive.google.com/drive/folders/1pnQJfxpMILCO2r7FUH3wotmoJ6Y2vE4F?usp=sharing
+NER-model
+https://drive.google.com/drive/folders/1oB6GrNepkSnDQxPUzDII6L7zJ06TvKU_?usp=drive_link
 
+Severity Classifier model
+https://drive.google.com/drive/folders/1Ay5FCmKnO2Q-RsL-1UT4TmkZSYKPoIjU?usp=sharing
 
 ## **Steps**
 1. Clone the repo & Set up virtual environment.
@@ -25,7 +28,7 @@ https://drive.google.com/drive/folders/1pnQJfxpMILCO2r7FUH3wotmoJ6Y2vE4F?usp=sha
 ```bash
 pip install -r requirements.txt
 ```
-2a. Update your model_path in config file.
+2a. Update your model_paths  in config file.
 
 3. Run predictions
 
