@@ -237,21 +237,42 @@ flowchart TD
     E --> I
     C --> G[Token- NER Highlights]
     D --> H[SHAP Explanation]
-    
-    
-    
 ```
+    
+    
+```mermaid
+flowchart TD
+    subgraph UPLOAD[CSV Upload & Preprocessing]
+        A[Upload CSV<br>Preprocessing & Age Grouping]
+    end
 
-### 🔹 Condensed explanation:
+    subgraph NER[NER Module]
+        C[BioBERT Extract ADE & Drug Entities]
+        G[Token-level NER Highlights]
+    end
 
-1. **Upload & Preprocess:** CSV input with symptom text and age → age groups
-2. **NER:** Extract ADE & drug entities using BioBERT
-3. **Hybrid Severity:** Combine transformer classifier with rule-based rules → assign severity
-4. **Embeddings:** Use SentenceTransformer to generate embeddings for clustering
-5. **Clustering & Visualization:** K-Means + t-SNE → interactive plots by severity, age, entities
+    subgraph SEV[Severity Module]
+        D[BioBERT Severity Classifier]
+        H[SHAP Explanation]
+    end
 
-This version **removes all token-level highlight and intermediate steps**, focusing on the **core flow** for presentations.
+    subgraph CLUST[Clustering Module]
+        E[SentenceTransformer Embeddings<br>Clustering]
+        F[t-SNE<br>Interactive Cluster Plots]
+    end
 
----
+    subgraph CLIN[Clinical Insights]
+        I[Clinical Insights Dashboard]
+    end
 
-If you want, I can also make a **one-line per box version** with **horizontal layout** that fits nicely on a slide. It’s even more concise for reporting/presentation purposes. Do you want me to do that?
+    A --> C
+    A --> D
+    C --> G
+    D --> H
+    C --> E
+    D --> E
+    E --> F
+    C --> I
+    D --> I
+    E --> I
+```
