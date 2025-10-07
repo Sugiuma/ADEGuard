@@ -227,14 +227,16 @@ flowchart TD
 
     A --> C[NER: BioBERT Extract ADE & Drug Entities]
 
-    A --> D[BioBERT Severity Classifier + SHAP Explanation]
-
-    C --> E[SentenceTransformer Embeddings]
+    A --> D[BioBERT Severity Classifier] 
+    C --> E[SentenceTransformer Embeddings - Clustering]
     D --> E
 
-    E --> F[K-Means Clustering + t-SNE <br> Interactive Cluster Plots]
-   
-   
+    E --> F[t-SNE <br> Interactive Cluster Plots]
+    C --> G[Token- NER Highlights]
+    D --> H[SHAP Explanation]
+    C --> I[Clinical Insights Dashboard]
+    E --> I
+    D --> I
 ```
 
 ### 🔹 Condensed explanation:
