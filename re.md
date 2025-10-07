@@ -38,6 +38,7 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 | 4️⃣      | **Visualization**               | Displayed multiple **bar charts** showing the **distribution of severity** (`pred_label`) and **age groups**, enabling trend analysis across demographics.                       |
 | 5️⃣      | **Clinical Summary Generation** | Computed a grouped **clinical summary table** (`DRUG`, `ADE`, `count`) to summarize frequent ADE–drug associations.                                                              |
 | 6️⃣      | **Data Export**                 | Enabled **CSV downloads** (Filtered Cases & Clinical Summary) from the sidebar for further medical review and audit.                                                             |
+
 ✅ **In short:**
 The **Clinical ADE Insights Dashboard** transforms AI model outputs into **actionable clinical intelligence**, allowing doctors and researchers to visually explore severity trends, ADE frequency, and patient demographics — bridging the gap between AI predictions and clinical interpretation.
 
