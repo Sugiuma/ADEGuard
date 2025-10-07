@@ -657,3 +657,137 @@ The dashboard provides both **automation** and **interpretability**, bridging th
 
 Would you like me to generate a **formatted project report (PDF)** version next — with headings, numbered sections, and embedded diagrams (pipeline architecture + sample visual outputs placeholders)?
 It’ll be export-ready for submission or presentation slides.
+
+Perfect 🔥 — that’s exactly how to make your project **clinically interpretable and presentation-ready**.
+Let’s add a **new “📊 Clinical Insights Dashboard” tab** in your existing Streamlit app.
+This tab will:
+
+1. Let clinical reviewers **explore results interactively (filter by drug, ADE, cluster, etc.)**,
+2. Display **severity and age-group distribution charts**, and
+3. Provide **download buttons** for both **raw clustered data** and **clinical summary data**.
+
+---
+
+## ✅ Complete Streamlit Code for Clinical Insights Tab
+
+Below is a ready-to-paste section to add **after your clustering section** in your app.
+
+It assumes your DataFrame `df` already has these columns:
+`["symptom_text","age","age_group","ADE","DRUG","pred_label","cluster"]`
+
+---
+
+```python
+import streamlit as st
+import pandas as pd
+
+# --- Create Clinical Summary ---
+def generate_clinical_summary(df):
+    summary = (
+        df.groupby(["DRUG", "ADE", "pred_label", "age_group"])
+          .size()
+          .reset_index(name="case_count")
+    )
+    return summary
+
+# --- New Tab Layout ---
+tabs = st.tabs(["🧩 Clustering Results", "📊 Clinical Insights Dashboard"])
+
+# --- TAB 1 (existing): your clustering visualization code ---
+with tabs[0]:
+    st.write("Your clustering visualizations and explainability go here.")
+
+# --- TAB 2: Clinical Insights Dashboard ---
+with tabs[1]:
+    st.header("📊 Clinical ADE Insights Dashboard")
+    st.markdown("""
+    This dashboard helps clinical teams explore AI-classified adverse drug events 
+    by drug, symptom, severity, and age group.
+    """)
+
+    # --- Filters ---
+    col1, col2, col3 = st.columns(3)
+    selected_drug = col1.selectbox("Select a Drug", ["All"] + sorted(df["DRUG"].dropna().unique().tolist()))
+    selected_ade = col2.selectbox("Select an ADE", ["All"] + sorted(df["ADE"].dropna().unique().tolist()))
+    selected_cluster = col3.selectbox("Select Cluster", ["All"] + sorted(df["cluster"].unique().tolist()))
+
+    filtered_df = df.copy()
+    if selected_drug != "All":
+        filtered_df = filtered_df[filtered_df["DRUG"] == selected_drug]
+    if selected_ade != "All":
+        filtered_df = filtered_df[filtered_df["ADE"] == selected_ade]
+    if selected_cluster != "All":
+        filtered_df = filtered_df[filtered_df["cluster"] == selected_cluster]
+
+    # --- Show Data Preview ---
+    st.subheader("📄 Filtered Case Details")
+    st.dataframe(filtered_df[["symptom_text", "age", "age_group", "ADE", "DRUG", "pred_label", "cluster"]].head(20))
+
+    # --- Charts ---
+    st.subheader("📈 Severity Distribution")
+    st.bar_chart(filtered_df["pred_label"].value_counts())
+
+    st.subheader("👥 Age Group Distribution")
+    st.bar_chart(filtered_df["age_group"].value_counts())
+
+    # --- Clinical Summary Generation ---
+    clinical_summary = generate_clinical_summary(df)
+
+    st.subheader("📋 Clinical Summary Table")
+    st.dataframe(clinical_summary)
+
+    # --- Sidebar Download Buttons ---
+    st.sidebar.markdown("### 📥 Download Clinical Data")
+
+    # Prepare Raw Clustered Data
+    raw_csv = df[["symptom_text","age","age_group","ADE","DRUG","pred_label","cluster"]].to_csv(index=False).encode("utf-8")
+
+    # Prepare Clinical Summary
+    summary_csv = clinical_summary.to_csv(index=False).encode("utf-8")
+
+    st.sidebar.download_button(
+        label="⬇️ Download Raw Clustered Data (CSV)",
+        data=raw_csv,
+        file_name="clustered_raw_data.csv",
+        mime="text/csv"
+    )
+
+    st.sidebar.download_button(
+        label="⬇️ Download Clinical Summary (CSV)",
+        data=summary_csv,
+        file_name="clinical_summary.csv",
+        mime="text/csv"
+    )
+
+    st.sidebar.success("✅ Clustering complete — Data ready for clinical analysis!")
+```
+
+---
+
+## 🧠 What This Adds
+
+| Feature                                  | Purpose                                      |
+| ---------------------------------------- | -------------------------------------------- |
+| **📊 Tab “Clinical Insights Dashboard”** | Dedicated view for clinical reviewers        |
+| **Filters (Drug, ADE, Cluster)**         | Interactive exploration                      |
+| **Bar charts**                           | Severity & age distribution overview         |
+| **Summary Table**                        | Aggregated data for risk signal detection    |
+| **Two sidebar downloads**                | 1️⃣ Raw Clustered Data, 2️⃣ Clinical Summary |
+| **Streamlit layout**                     | Looks professional and presentation-ready    |
+
+---
+
+## 🩺 Example Workflow for Clinical Teams
+
+1. **Select a Drug** → e.g., *Ibuprofen*
+2. See **which ADEs** are linked and how severe they are
+3. Review **age-specific distributions**
+4. **Download** both CSVs:
+
+   * `clustered_raw_data.csv` → for record-level audit
+   * `clinical_summary.csv` → for reporting or Power BI
+
+---
+
+Would you like me to extend this further so each cluster automatically gets a **“theme description”** (e.g., Cluster 0 → “Gastrointestinal symptoms”)?
+That would make the dashboard even more clinically intuitive.
