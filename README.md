@@ -227,7 +227,7 @@ flowchart TD
 
     A --> C[NER: BioBERT Extract ADE & Drug Entities]
 
-    C --> D[BioBERT Severity Classifier + SHAP Explanation]
+    A --> D[BioBERT Severity Classifier + SHAP Explanation]
 
     C --> E[SentenceTransformer Embeddings]
     D --> E
