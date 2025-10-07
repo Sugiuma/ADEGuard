@@ -32,13 +32,15 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 
 | **Step** | **Task**                    | **Purpose / Outcome**                                              |
 | :------: | --------------------------- | ------------------------------------------------------------------ |
-|     1    | **Input Loading**           | Upload CSV containing symptom text and age                         |
-|     2    | **Age Grouping**            | Categorize patients into Child / Young Adult / Middle Age / Senior |
-|     3    | **Load BioBERT NER Model**  | Initialize token classification model for ADE & Drug detection     |
-|     4    | **Tokenization & Labeling** | Predict BIO tags for each token (B/I-ADE, B/I-DRUG, O)             |
-|     5    | **Entity Assembly**         | Merge sub-tokens to form full ADE or Drug phrases                  |
-|     6    | **Visualization**           | Highlight detected entities (red = ADE, blue = Drug)               |
-|     7    | **Export**                  | Save processed dataset with extracted entities                     |
+|    1️⃣     | **Input Loading**           | Upload CSV containing symptom text and age                         |
+|     2️⃣   | **Age Grouping**            | Categorize patients into Child / Young Adult / Middle Age / Senior |
+|     3️⃣    | **Load BioBERT NER Model**  | Initialize token classification model for ADE & Drug detection     |
+|     4️⃣   | **Tokenization & Labeling** | Predict BIO tags for each token (B/I-ADE, B/I-DRUG, O)             |
+|     5️⃣   | **Entity Assembly**         | Merge sub-tokens to form full ADE or Drug phrases                  |
+|     6️⃣    | **Visualization**           | Highlight detected entities (red = ADE, blue = Drug)               |
+|    7️⃣   | **Post Processing**         | Rule-based dictionary matching and text cleaning to recover missed ADE/Drug entities and refine NER output quality|
+
+
 
 🟩 *Outcome:* Extracts clean ADE and Drug entities for downstream analysis.
 
@@ -48,12 +50,12 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 
 | **Step** | **Task**                | **Purpose / Outcome**                                          |
 | :------: | ----------------------- | -------------------------------------------------------------- |
-|     1    | **Load Classifier**     | Load fine-tuned text classification model                      |
-|     2    | **Predict Severity**    | Output severity levels (Severe / Moderate / Mild)              |
-|     3    | **Hybrid Logic**        | Use weak labels or rule-based fallback for missing predictions |
-|     4    | **SHAP Explainability** | Identify which words drive the model’s severity decision       |
-|     5    | **Token Highlights**    | Visualize important symptom words in color-coded text          |
-|     6    | **Feature Importance**  | Show bar chart of word influence scores                        |
+|     1️⃣   | **Input Loading** | Get symptom_text and weak_labels from input data
+|2️⃣  | **Load Classifier**     | Load fine-tuned text classification model                      |
+|     3️⃣     | **Predict Severity**    | Output severity levels (Severe / Moderate / Mild)              |
+|     4️⃣     | **SHAP Explainability** | Identify which words drive the model’s severity decision       |
+|   5️⃣  | **Token Highlights**    | Visualize important symptom words in color-coded text          |
+|     6️⃣    | **Feature Importance**  | Show bar chart of word influence scores                        |
 
 🟦 *Outcome:* Provides both automated severity scoring and transparent, interpretable results.
 
@@ -63,11 +65,12 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 
 | **Step** | **Task**                      | **Purpose / Outcome**                                                       |
 | :------: | ----------------------------- | --------------------------------------------------------------------------- |
-|     1    | **Sentence Embedding**        | Convert each ADE record into numerical representation (SentenceTransformer) |
-|     2    | **Dimensionality Reduction**  | Apply t-SNE for 2D visual mapping of embeddings                             |
-|     3    | **K-Means Clustering**        | Group similar ADE cases based on textual similarity                         |
-|     4    | **Cluster Analysis**          | Examine patterns by Severity, Drug type, and Age Group                      |
-|     5    | **Interactive Visualization** | Use Plotly scatter plot for exploration and insight discovery               |
+|     1️⃣    | **Sentence Embedding**        | Convert each ADE record into numerical representation (SentenceTransformer) |
+|     2️⃣  | **Hybrid Severity** | Combines classifier output & rule-based fallback for determining modifiers for clustering |
+| 3️⃣| **Dimensionality Reduction**  | Apply t-SNE for 2D visual mapping of embeddings                             |
+|    4️⃣    | **K-Means Clustering**        | Group similar ADE cases based on textual similarity                         |
+
+|     5️⃣    | **Interactive Visualization** | Use Plotly scatter plot for exploration and insight discovery               |
 
 🟨 *Outcome:* Reveals hidden relationships between symptoms, drugs, and severity.
 
