@@ -26,7 +26,7 @@ id2label = {i: label for i, label in enumerate(label_list)}
 print("Detected labels:", label_list)
 
 # -------------------------------
-# STEP 2: Reader for your format
+# STEP 2: Reader for conll format
 # -------------------------------
 def read_conll(filepath):
     examples = []
@@ -132,7 +132,7 @@ import evaluate
 import numpy as np
 
 # -----------------------------
-# 3️⃣ Load your dataset
+# 3️⃣ Load dataset
 # -----------------------------
 dataset = DatasetDict({
     "train": Dataset.from_list(train_data),
