@@ -223,11 +223,11 @@ Got it! We can condense your pipeline into a **simpler, compact Mermaid flow** s
 
 ```mermaid
 flowchart TD
-    A[Upload CSV: symptom_text + Age <br> Preprocessing & Age Grouping]
+    A[Upload CSV <br> Preprocessing & Age Grouping]
 
     A --> C[NER: BioBERT Extract ADE & Drug Entities]
 
-    C --> D[BioBERT Severity Classifier + SHAP Explaination]
+    C --> D[BioBERT Severity Classifier + SHAP Explanation]
 
     C --> E[SentenceTransformer Embeddings]
     D --> E
