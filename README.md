@@ -10,7 +10,7 @@
 
 [Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/class_rep_seve.png)
 
-[Severity Classifier Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Severity_classifier_model_Card.md)
+[Severity Classifier Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Severity_classifier_model_card.md)
 
 [Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
 
