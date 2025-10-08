@@ -66,12 +66,12 @@ A --> G[BioBERT Severity Classifier]
 G --> J[SHAP Explanations]
 
 %% NER Tab
-B --> C[NER Tab: Token-level Highlights]
-B --> D[Clustering & Visuals]
+B --> C[NER Tab: Token-level Highlights Tab] 
+B --> D[Clustering & Visuals Tab] 
 G --> D
 
 %% Streamlit Dashboard Integration
-C --> L[Clinical Insights Dashboard]
+C --> L[Clinical Insights Tab]
 D --> L
 J --> L
 ```
