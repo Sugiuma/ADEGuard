@@ -98,20 +98,16 @@ Below is a set of **bullet points** covering freezing layers, Snorkel, and sever
   Only the task-specific classification head was trained while freezing the lower transformer layers of BioBERT. This reduced training time and GPU memory usage, while retaining pretrained biomedical linguistic knowledge.
 
 ### 🔹 **Weak Supervision & Label Enrichment**
-* **Snorkel Labeling Functions:**
-  Used rule-based heuristics, keyword lists, and domain lexicons as labeling functions to automatically generate weak labels for unlabeled clinical text.
-* **Label Model Aggregation:**
-  Combined multiple noisy label sources using Snorkel’s probabilistic label model to estimate true labels with confidence scores.
-* **Hybrid Label Refinement:**
-  Combined Snorkel-generated weak labels with human-validated samples for semi-supervised model improvement.
+ **Snorkel Labeling Functions & Label Model Aggregation:**
+  Used rule-based heuristics and combined multiple label sources using Snorkel’s probabilistic label model to estimate true labels with confidence scores.
 
 ### 🔹 **Post-Processing & Interpretability**
-* **Rule-Based Override Layer:**
-  Implemented a rule-based hybrid logic (e.g., keyword-based severity escalation for “high fever,” “hospitalized,” etc.) to correct classifier underestimation errors.
-* **SHAP-Based Explainability:**
+ **Rule-Based Override Layer:**
+  Implemented a rule-based hybrid logic to correct NER & classifier underestimation errors.
+**SHAP-Based Explainability:**
   Visualized token-level contribution toward severity classification, aiding interpretability for clinical reviewers.
 
-### 🔹 **Inference Optimization & Deployment**
+### 🔹 **Deployment**
  **Caching with @st.cache_resource:**
   Cached tokenizer, model, and SHAP explainer to avoid repeated reinitialization in Streamlit sessions.
 
