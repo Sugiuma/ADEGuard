@@ -81,9 +81,33 @@ Severity class prediction:
 ### **Intended Integration**
 Part of the **ADEGuard Clinical Safety Pipeline**
 
+### **Metrics**
+### **Classifier Training Summary**
+
+| Epoch | Training Loss | Validation Loss | Accuracy | F1 Score |
+| ----- | ------------- | --------------- | -------- | -------- |
+| 1     | 0.3282        | 0.1849          | 94.25%   | 93.99%   |
+| 2     | 0.1664        | 0.1932          | 94.25%   | 94.13%   |
+| 3     | 0.1352        | 0.2115          | 94.43%   | 94.29%   |
+
+**Test Set Performance:**
+
+* Loss: 0.2307
+* Accuracy: 94.18%
+* F1 Score: 94.08%
+
+**Interpretation:**
+
+* Training loss decreases, showing effective learning.
+* Slight validation loss rise in later epochs but accuracy remains high → good generalization.
+* Model performs reliably for ADE severity classification.
+
+
 
 ### **Citation / Acknowledgment**
 > Built using `dmis-lab/biobert-base-cased-v1.1` and VAERS 2020–2025 public data.
+
 > Weak supervision inspired by Snorkel (Ratner et al., 2020).
+
 > Developed as part of ADEGuard for pharmacovigilance and safety monitoring.
 
