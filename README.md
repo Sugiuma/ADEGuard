@@ -30,24 +30,16 @@ pip install -r requirements.txt
 ```
 2a. cd src/ and Update your model_paths  in config file.
 
-3a. Run predictions on NER model
+3. Run predictions on NER model
 
 ```bash
-python inference.py
+python inference_ner.py
 ```
-3b. Run predictions on Severity classifier model
+4. Run predictions on Severity classifier model
 
 ```bash
-python batch_inference_severity.py
+python inference_severity.py
 ```
-4. Run inference on a CSV batch_inference for NER model:
-
-```bash
-python batch_inference.py --input_csv batch_input.csv --output_csv predicted_entities.csv
-```
-
-* **`input.csv`** must have a column named `symptom_text`.
-* The script outputs **`predicted_entities.csv`** with two new columns: `predicted_DRUG` and `predicted_ADE`.
 
 5. Run the Streamlit app
 
