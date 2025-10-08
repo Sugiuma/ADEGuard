@@ -88,53 +88,7 @@ Snorkel was used to automatically infer **severity levels** (Severe, Moderate, M
 ✅ **In short:**
 The **Clinical ADE Insights Dashboard** transforms AI model outputs into **actionable clinical intelligence**, allowing doctors and researchers to visually explore severity trends, ADE frequency, and patient demographics — bridging the gap between AI predictions and clinical interpretation.
 
-### **Classifier Training Summary**
 
-| Epoch | Training Loss | Validation Loss | Accuracy | F1 Score |
-| ----- | ------------- | --------------- | -------- | -------- |
-| 1     | 0.3282        | 0.1849          | 94.25%   | 93.99%   |
-| 2     | 0.1664        | 0.1932          | 94.25%   | 94.13%   |
-| 3     | 0.1352        | 0.2115          | 94.43%   | 94.29%   |
-
-**Test Set Performance:**
-
-* Loss: 0.2307
-* Accuracy: 94.18%
-* F1 Score: 94.08%
-
-**Interpretation:**
-
-* Training loss decreases, showing effective learning.
-* Slight validation loss rise in later epochs but accuracy remains high → good generalization.
-* Model performs reliably for ADE severity classification.
-
-
-### **NER Training Summary**
-
-| Step | Training Loss | Validation Loss | Precision | Recall | F1 Score |
-| ---- | ------------- | --------------- | --------- | ------ | -------- |
-| 500  | 0.0652        | 0.0287          | 75.43%    | 98.93% | 85.60%   |
-| 1000 | 0.0327        | 0.0159          | 86.38%    | 99.52% | 92.48%   |
-| 1500 | 0.0143        | 0.0115          | 91.99%    | 99.56% | 95.63%   |
-| 2000 | 0.0114        | 0.0114          | 89.89%    | 99.81% | 94.59%   |
-| 2500 | 0.0072        | 0.0099          | 92.66%    | 99.73% | 96.07%   |
-| 3000 | 0.0182        | 0.0099          | 95.48%    | 99.78% | 97.58%   |
-| 3500 | 0.0063        | 0.0076          | 94.81%    | 99.75% | 97.22%   |
-| 4000 | 0.0045        | 0.0099          | 96.15%    | 99.82% | 97.95%   |
-| 4500 | 0.0053        | 0.0088          | 96.46%    | 99.81% | 98.11%   |
-
-**Test Set Performance:**
-
-* Loss: 0.00564
-* Precision: 96.27%
-* Recall: 99.75%
-* F1 Score: 97.98%
-
-**Interpretation:**
-
-* Training and validation loss steadily decrease → good learning.
-* Precision and F1 increase over steps → the model correctly identifies ADE/Drug entities.
-* High recall indicates very few ADE/Drug entities are missed.
 
 
 
