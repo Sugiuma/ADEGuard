@@ -1,13 +1,28 @@
-from transformers import AutoTokenizer, AutoModelForTokenClassification, TrainingArguments, Trainer, DataCollatorForTokenClassification
-from datasets import Dataset, DatasetDict
-import numpy as np
-from seqeval.metrics import precision_score, recall_score, f1_score, accuracy_score
-import random
-from sklearn.model_selection import train_test_split
+"""
+Train a BioBERT model for ADE/Drug NER from CoNLL-style data with class weighting.
+"""
 
-# -------------------------------
-# STEP 1: Detect labels from files
-# -------------------------------
+import os
+import random
+import numpy as np
+from collections import Counter
+from sklearn.model_selection import train_test_split
+from datasets import Dataset, DatasetDict
+from transformers import (
+    AutoTokenizer,
+    AutoModelForTokenClassification,
+    DataCollatorForTokenClassification,
+    TrainingArguments,
+    Trainer,
+)
+import torch
+import torch.nn as nn
+from seqeval.metrics import classification_report
+
+
+# ============================================================
+# STEP 1: Detect labels from CoNLL file(s)
+# ============================================================
 def collect_labels(files):
     labels = set()
     for file in files:
@@ -20,18 +35,13 @@ def collect_labels(files):
                 labels.add(parts[-1])  # last col = label
     return sorted(list(labels))
 
-label_list = collect_labels(["/content/sample_data/project1.conll"])#, "/content/sample_data/gold.conll"])
-label2id = {label: i for i, label in enumerate(label_list)}
-id2label = {i: label for i, label in enumerate(label_list)}
-print("Detected labels:", label_list)
 
-# -------------------------------
-# STEP 2: Reader for conll format
-# -------------------------------
-def read_conll(filepath):
+# ============================================================
+# STEP 2: Read CoNLL-style data
+# ============================================================
+def read_conll(filepath, label2id):
     examples = []
     tokens, tags = [], []
-
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -40,178 +50,52 @@ def read_conll(filepath):
                     examples.append({"tokens": tokens, "ner_tags": [label2id[tag] for tag in tags]})
                     tokens, tags = [], []
                 continue
-
             parts = line.split()
-            token, tag = parts[0], parts[-1]   # first col = token, last col = label
+            token, tag = parts[0], parts[-1]
             tokens.append(token)
             tags.append(tag)
-
-        if tokens:  # last sentence
+        if tokens:
             examples.append({"tokens": tokens, "ner_tags": [label2id[tag] for tag in tags]})
-
     return examples
 
-# -------------------------------
-# STEP 3: Build dataset
-# -------------------------------
-silver_data = read_conll("/content/sample_data/project1.conll")   # weak silver labels
-#gold_data   = read_conll("/content/sample_data/gold.conll")     # gold labels
 
-#print("Gold examples:", len(gold_data))
-print("Silver examples:", len(silver_data))
+# ============================================================
+# STEP 3: Dataset creation + splitting
+# ============================================================
+def create_datasets(conll_path, label2id):
+    silver_data = read_conll(conll_path, label2id)
+    random.shuffle(silver_data)
 
-random.shuffle(silver_data)
-#random.shuffle(gold_data)
+    train_data, temp_data = train_test_split(silver_data, test_size=0.15, random_state=42)
+    val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
 
+    print(f"Train: {len(train_data)} | Val: {len(val_data)} | Test: {len(test_data)}")
 
-# First split: train vs temp (val+test)
-train_data, temp_data = train_test_split(
-    silver_data,
-    test_size=0.15,   # 15% goes to val+test
-    random_state=42,  # reproducibility
-    shuffle=True
-)
-
-# Second split: val vs test
-val_data, test_data = train_test_split(
-    temp_data,
-    test_size=0.5,    # half of 15% → 7.5% test, 7.5% val
-    random_state=42,
-    shuffle=True
-)
-
-print(f"Train: {len(train_data)}")
-print(f"Val:   {len(val_data)}")
-print(f"Test:  {len(test_data)}")
+    return DatasetDict({
+        "train": Dataset.from_list(train_data),
+        "validation": Dataset.from_list(val_data),
+        "test": Dataset.from_list(test_data),
+    })
 
 
-#train_data = silver_data + gold_data[:350]  # mix weak + gold
-#val_data   = gold_data[350:425]  # ~75 examples
-#test_data  = gold_data[425:]     # ~75 examples
-
-dataset = DatasetDict({
-   "train": Dataset.from_list(train_data),
-   "validation": Dataset.from_list(val_data),
-    "test": Dataset.from_list(test_data),
-})
-
-#print(dataset)
-
-from collections import Counter
-
-def print_label_counts(dataset, split_name, key="ner_tags"):
-    """
-    Print label counts for a dataset split.
-    - dataset: HuggingFace Dataset
-    - split_name: "train", "validation", or "test"
-    - key: column containing labels ("ner_tags" before tokenization, "labels" after)
-    """
+# ============================================================
+# STEP 4: Compute class weights
+# ============================================================
+def compute_class_weights(dataset, num_labels, label_column="ner_tags"):
     counts = Counter()
-    for labels in dataset[split_name][key]:
-        counts.update(labels)
-
-    # remove padding ignore index (-100) if present
-    if -100 in counts:
-        del counts[-100]
-
-    print(f"\n🔹 {split_name} counts (from '{key}'):")
-    for label_id, cnt in sorted(counts.items()):
-        print(f"  {label_id:>2} : {cnt}")
-
-from datasets import Dataset, DatasetDict
-from collections import Counter
-import torch
-import torch.nn as nn
-from transformers import (
-    AutoTokenizer,
-    AutoModelForTokenClassification,
-    TrainingArguments,
-    Trainer
-)
-import evaluate
-import numpy as np
-
-# -----------------------------
-# 3️⃣ Load dataset
-# -----------------------------
-dataset = DatasetDict({
-    "train": Dataset.from_list(train_data),
-    "validation": Dataset.from_list(val_data),
-    "test": Dataset.from_list(test_data),
-})
-
-label_column = "ner_tags"
-
-
-for split in ["train", "validation", "test"]:
-    print_label_counts(dataset, split, key="ner_tags")
-
-import torch
-from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
-from collections import Counter
-
-# ------------------------
-# 1. Define labels
-# ------------------------
-label_list = ["B-ADE", "B-DRUG","I-ADE","I-DRUG","O"]
-num_labels = len(label_list)
-label2id = {l: i for i, l in enumerate(label_list)}
-id2label = {i: l for i, l in enumerate(label_list)}
-
-# ------------------------
-# 2. Compute class weights from dataset
-# ------------------------
-def compute_class_weights(dataset, label_column="ner_tags"):
-    counts = Counter()
-    for split in ["train"]:
-        for seq in dataset[split][label_column]:
-            counts.update(seq)
+    for seq in dataset["train"][label_column]:
+        counts.update(seq)
     total = sum(counts.values())
     weights = []
     for i in range(num_labels):
-        # weight = total / (num_labels * class_count)
         weights.append(total / (num_labels * counts[i]) if counts[i] > 0 else 1.0)
     return torch.tensor(weights, dtype=torch.float)
 
-class_weights = compute_class_weights(dataset)
-print("Class weights:", class_weights)
 
-weights = torch.tensor([ 2.6494, 22.1747,  4.8549, 51.0511,  0.2298])
-weights = weights / weights.max()  # normalize so max = 1
-print("weights",weights)
-
-print("I-DRUG / O weight ratio:", weights[3]/weights[4])
-
-model_name = "dmis-lab/biobert-base-cased-v1.1"
-
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-num_labels = len(label_list)  # e.g., 5 labels
-model = AutoModelForTokenClassification.from_pretrained(
-    model_name,
-    num_labels=num_labels,
-    id2label=id2label,
-    label2id=label2id,
-    return_dict=True  # ensures outputs.logits exists
-)
-
-# Freeze all parameters
-for param in model.bert.parameters():
-    param.requires_grad = False
-
-# Unfreeze the last 4 encoder layers
-for layer in model.bert.encoder.layer[-4:]:
-    for param in layer.parameters():
-        param.requires_grad = True
-
-# Classifier head is always trainable
-for param in model.classifier.parameters():
-    param.requires_grad = True
-
-
-for name, param in model.named_parameters():
-    print(name, param.requires_grad)
-
-def tokenize_and_align_labels(examples):
+# ============================================================
+# STEP 5: Tokenization + alignment
+# ============================================================
+def tokenize_and_align_labels(examples, tokenizer, label2id):
     tokenized_inputs = tokenizer(
         examples["tokens"],
         truncation=True,
@@ -230,7 +114,7 @@ def tokenize_and_align_labels(examples):
             elif word_idx != previous_word_idx:
                 label_ids.append(label[word_idx])
             else:
-                # for subword tokens: keep same label if not O, else O
+                # same word → same label unless O
                 label_ids.append(label[word_idx] if label[word_idx] != label2id["O"] else label2id["O"])
             previous_word_idx = word_idx
         labels.append(label_ids)
@@ -238,64 +122,10 @@ def tokenize_and_align_labels(examples):
     tokenized_inputs["labels"] = labels
     return tokenized_inputs
 
-tokenized_datasets = dataset.map(tokenize_and_align_labels, batched=True)
 
-# Normalized weights tensor
-weights = torch.tensor([0.0519, 0.4344, 0.0951, 1.0000, 0.0045]).to("cuda")
-
-# Overwrite model's forward via Trainer
-def compute_loss(model, inputs, return_outputs=False):
-    labels = inputs.pop("labels")
-    outputs = model(**inputs)
-    logits = outputs.logits
-    loss_fct = nn.CrossEntropyLoss(weight=weights, ignore_index=-100)
-    loss = loss_fct(logits.view(-1, logits.shape[-1]), labels.view(-1))
-    return (loss, outputs) if return_outputs else loss
-
-data_collator = DataCollatorForTokenClassification(tokenizer)
-
-from seqeval.metrics import classification_report
-import numpy as np
-
-def compute_metrics(p):
-    predictions, labels = p
-    predictions = np.argmax(predictions, axis=2)
-
-    true_labels = [[id2label[l] for l in label if l != -100] for label in labels]
-    true_preds = [
-        [id2label[p] for (p, l) in zip(prediction, label) if l != -100]
-        for prediction, label in zip(predictions, labels)
-    ]
-
-    report = classification_report(true_labels, true_preds, output_dict=True)
-    return {
-        "precision": report["micro avg"]["precision"],
-        "recall": report["micro avg"]["recall"],
-        "f1": report["micro avg"]["f1-score"]
-    }
-
-training_args = TrainingArguments(
-    output_dir="./ner_biobert",
-    eval_strategy="steps",
-    eval_steps=500,
-    save_steps=1000,
-    logging_steps=100,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
-    num_train_epochs=5,
-    learning_rate=5e-5,
-    weight_decay=0.01,
-    save_total_limit=2,
-    logging_dir="./logs",
-    load_best_model_at_end=True,
-    metric_for_best_model="f1",
-    greater_is_better=True,
-    report_to=[],
-    push_to_hub=False
-)
-
-from transformers import Trainer
-
+# ============================================================
+# STEP 6: Weighted Trainer
+# ============================================================
 class WeightedTrainer(Trainer):
     def __init__(self, weights, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -309,42 +139,131 @@ class WeightedTrainer(Trainer):
         loss = loss_fct(logits.view(-1, logits.shape[-1]), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
 
-trainer = WeightedTrainer(
-    weights=weights,
-    model=model,
-    args=training_args,
-    train_dataset=tokenized_datasets["train"],
-    eval_dataset=tokenized_datasets["validation"],
-    tokenizer=tokenizer,
-    data_collator=data_collator,
-    compute_metrics=compute_metrics,
-)
 
-trainer.train()
+# ============================================================
+# STEP 7: Metrics
+# ============================================================
+def compute_metrics(p, id2label):
+    predictions, labels = p
+    predictions = np.argmax(predictions, axis=2)
 
-metrics = trainer.evaluate(tokenized_datasets["test"])
-print(metrics)
+    true_labels = [[id2label[l] for l in label if l != -100] for label in labels]
+    true_preds = [
+        [id2label[p] for (p, l) in zip(pred, label) if l != -100]
+        for pred, label in zip(predictions, labels)
+    ]
+    report = classification_report(true_labels, true_preds, output_dict=True)
+    return {
+        "precision": report["micro avg"]["precision"],
+        "recall": report["micro avg"]["recall"],
+        "f1": report["micro avg"]["f1-score"]
+    }
 
-save_path = "biobert-ner-final"
 
-# Save model
-model.save_pretrained(save_path)
+# ============================================================
+# STEP 8: Main
+# ============================================================
+def main():
+    # Paths
+    conll_path = "/content/sample_data/project1.conll"  # <-- update this path as needed
+    output_dir = "./ner_biobert"
 
-# Save tokenizer
-tokenizer.save_pretrained(save_path)
+    # Detect labels
+    label_list = collect_labels([conll_path])
+    label2id = {label: i for i, label in enumerate(label_list)}
+    id2label = {i: label for i, label in enumerate(label_list)}
+    num_labels = len(label_list)
+    print("Detected labels:", label_list)
 
-print(f"✅ Model and tokenizer saved to '{save_path}'")
+    # Build dataset
+    dataset = create_datasets(conll_path, label2id)
 
-from seqeval.metrics import classification_report
+    # Model & tokenizer
+    model_name = "dmis-lab/biobert-base-cased-v1.1"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_name,
+        num_labels=num_labels,
+        id2label=id2label,
+        label2id=label2id,
+        return_dict=True
+    )
 
-preds_output = trainer.predict(tokenized_datasets["validation"])
-preds = np.argmax(preds_output.predictions, axis=2)
+    # Freeze layers (except last 4)
+    for param in model.bert.parameters():
+        param.requires_grad = False
+    for layer in model.bert.encoder.layer[-4:]:
+        for param in layer.parameters():
+            param.requires_grad = True
+    for param in model.classifier.parameters():
+        param.requires_grad = True
 
-true_labels = [[id2label[l] for l in label if l != -100] for label in preds_output.label_ids]
-true_preds = [
-    [id2label[p] for (p, l) in zip(pred, label) if l != -100]
-    for pred, label in zip(preds, preds_output.label_ids)
-]
+    # Compute class weights
+    class_weights = compute_class_weights(dataset, num_labels)
+    class_weights = class_weights / class_weights.max()
+    print("Normalized class weights:", class_weights)
 
-print(classification_report(true_labels, true_preds, digits=3))
+    # Tokenize
+    tokenized_datasets = dataset.map(
+        lambda x: tokenize_and_align_labels(x, tokenizer, label2id),
+        batched=True
+    )
 
+    # Data collator
+    data_collator = DataCollatorForTokenClassification(tokenizer)
+
+    # Training args
+    training_args = TrainingArguments(
+        output_dir=output_dir,
+        evaluation_strategy="steps",
+        eval_steps=500,
+        save_steps=1000,
+        logging_steps=100,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        num_train_epochs=5,
+        learning_rate=5e-5,
+        weight_decay=0.01,
+        save_total_limit=2,
+        load_best_model_at_end=True,
+        metric_for_best_model="f1",
+        greater_is_better=True,
+        report_to=[],
+    )
+
+    # Trainer
+    trainer = WeightedTrainer(
+        weights=class_weights,
+        model=model,
+        args=training_args,
+        train_dataset=tokenized_datasets["train"],
+        eval_dataset=tokenized_datasets["validation"],
+        tokenizer=tokenizer,
+        data_collator=data_collator,
+        compute_metrics=lambda p: compute_metrics(p, id2label),
+    )
+
+    # Train & evaluate
+    trainer.train()
+    metrics = trainer.evaluate(tokenized_datasets["test"])
+    print("Test Metrics:", metrics)
+
+    # Save model
+    model.save_pretrained(os.path.join(output_dir, "final_model"))
+    tokenizer.save_pretrained(os.path.join(output_dir, "final_model"))
+    print(f"✅ Model and tokenizer saved to {output_dir}/final_model")
+
+    # Detailed report
+    preds_output = trainer.predict(tokenized_datasets["validation"])
+    preds = np.argmax(preds_output.predictions, axis=2)
+    true_labels = [[id2label[l] for l in label if l != -100] for label in preds_output.label_ids]
+    true_preds = [
+        [id2label[p] for (p, l) in zip(pred, label) if l != -100]
+        for pred, label in zip(preds, preds_output.label_ids)
+    ]
+    print("\nValidation Classification Report:")
+    print(classification_report(true_labels, true_preds, digits=3))
+
+
+if __name__ == "__main__":
+    main()
