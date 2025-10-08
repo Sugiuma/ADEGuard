@@ -1,4 +1,11 @@
 ## 🧾 Model Card — Severity Classifier (BioBERT)
+
+Model Name: ADEGuard-BioBERT-Severity Classifier 
+
+Version: 1.0
+
+Authors / Maintainers: Suganya G
+
 ### **Model Type:** Sequence Classification (Severity Prediction) based on BioBERT
 
 ### **Intended Use**
