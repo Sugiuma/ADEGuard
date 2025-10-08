@@ -6,7 +6,7 @@
 
 [Severity Classifier Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/trainin_sev.png)
 
-[Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/class_rep_sev.png)
+[Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/class_rep_seve.png)
 
 [Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
 
