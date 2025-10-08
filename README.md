@@ -1,8 +1,12 @@
 **Model Performance Reports**
 
-[Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
+[NER Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
 
-[Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
+[NER Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
+
+[Severity Classifier Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
+
+[Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
 
 [Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
 
