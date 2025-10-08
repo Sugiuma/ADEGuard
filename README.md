@@ -4,9 +4,9 @@
 
 [NER Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
 
-[Severity Classifier Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
+[Severity Classifier Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/trainin_sev.png)
 
-[Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
+[Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/class_rep_sev.png)
 
 [Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
 
