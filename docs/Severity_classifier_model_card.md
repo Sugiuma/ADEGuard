@@ -22,6 +22,7 @@ Severity class prediction:
 
 ### **Training Details**
 **Base Model:** `dmis-lab/biobert-base-cased-v1.1`
+
 **Framework:** Hugging Face Transformers (PyTorch)
 **Training Dataset:**
 
@@ -71,7 +72,7 @@ Severity class prediction:
 
 
 ### **Intended Integration**
-Part of the **ADEGuard Clinical Safety Pipeline**:
+Part of the **ADEGuard Clinical Safety Pipeline**
 
 
 ### **Citation / Acknowledgment**
