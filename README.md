@@ -28,7 +28,7 @@ https://drive.google.com/drive/folders/1Ay5FCmKnO2Q-RsL-1UT4TmkZSYKPoIjU?usp=sha
 ```bash
 pip install -r requirements.txt
 ```
-2a. Update your model_paths  in config file.
+2a. cd src/ and Update your model_paths  in config file.
 
 3a. Run predictions on NER model
 
