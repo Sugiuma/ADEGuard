@@ -85,3 +85,34 @@ J --> L
 | **Clinical Insights Tab**          | Combines all tabs for the full visualization experience & insights                       |
 
 
+Excellent — this is exactly the kind of technical insight you can highlight in a **project write-up or research summary** under *“Efficient or Creative Approaches in Model Deployment and Optimization.”*
+
+Below is a set of **bullet points** covering freezing layers, Snorkel, and several other pre/post-processing and inference optimization techniques — phrased for inclusion in reports or presentations 👇
+
+---
+
+## ⚙️ **Efficient Approaches in Model Deployment & Optimization**
+
+### 🔹 **Model Architecture & Training Efficiency**
+ **Layer Freezing for Efficient Fine-Tuning:**
+  Only the task-specific classification head was trained while freezing the lower transformer layers of BioBERT. This reduced training time and GPU memory usage, while retaining pretrained biomedical linguistic knowledge.
+
+### 🔹 **Weak Supervision & Label Enrichment**
+* **Snorkel Labeling Functions:**
+  Used rule-based heuristics, keyword lists, and domain lexicons as labeling functions to automatically generate weak labels for unlabeled clinical text.
+* **Label Model Aggregation:**
+  Combined multiple noisy label sources using Snorkel’s probabilistic label model to estimate true labels with confidence scores.
+* **Hybrid Label Refinement:**
+  Combined Snorkel-generated weak labels with human-validated samples for semi-supervised model improvement.
+
+### 🔹 **Post-Processing & Interpretability**
+* **Rule-Based Override Layer:**
+  Implemented a rule-based hybrid logic (e.g., keyword-based severity escalation for “high fever,” “hospitalized,” etc.) to correct classifier underestimation errors.
+* **SHAP-Based Explainability:**
+  Visualized token-level contribution toward severity classification, aiding interpretability for clinical reviewers.
+
+### 🔹 **Inference Optimization & Deployment**
+ **Caching with @st.cache_resource:**
+  Cached tokenizer, model, and SHAP explainer to avoid repeated reinitialization in Streamlit sessions.
+
+
