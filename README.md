@@ -55,8 +55,7 @@ streamlit run app.py
    
 Upload sample1.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo)
 
-
-Perfect! Here's a **Streamlit tab-focused Mermaid.js flow** that’s compact and maps directly to your UI tabs:
+### Architecture of ADEGuard
 
 ```mermaid
 flowchart TD
@@ -76,7 +75,7 @@ D --> L
 J --> L
 ```
 
-### **How it maps to your Streamlit app**
+### **Tab explanations**
 
 | Tab                    | Description                                                                                 |
 | ---------------------- | ------------------------------------------------------------------------------------------- |
