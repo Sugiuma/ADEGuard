@@ -79,9 +79,7 @@ G --> J[SHAP Explanations]
 
 %% Streamlit Dashboard Integration
 C --> L[Streamlit Dashboard]
-F --> L
-I --> L
-K --> L
+
 ```
 
 ### **How it maps to your Streamlit app**
