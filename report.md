@@ -807,3 +807,72 @@ with tabs[1]:
 
 Would you like me to extend this further so each cluster automatically gets a **“theme description”** (e.g., Cluster 0 → “Gastrointestinal symptoms”)?
 That would make the dashboard even more clinically intuitive.
+Absolutely ✅ — here’s a **clear, concise summary** of the exact **steps performed in your code** for **weak label generation using Snorkel** 👇
+
+---
+
+## 🧩 **Steps for Weak Label Generation**
+
+1. **Define Label Space**
+
+   * Created integer label IDs for three severity levels:
+     `SEVERE = 0`, `MODERATE = 1`, `MILD = 2`, `ABSTAIN = -1`.
+   * Defined a mapping:
+
+     ```python
+     id2label = {0: "Severe", 1: "Moderate", 2: "Mild"}
+     ```
+
+2. **Design Labeling Functions (LFs)**
+
+   * Implemented multiple **heuristic labeling functions** using Snorkel’s `@labeling_function()` decorator.
+   * LFs capture both **structured features** and **text-based cues**:
+
+     * `lf_died`, `lf_hospital`, `lf_l_threat`, `lf_disable` → label **Severe** based on serious clinical outcomes (`DIED`, `HOSPITAL`, etc.).
+     * `lf_text_severe`, `lf_text_moderate`, `lf_text_mild` → label based on **keywords** in `SYMPTOM_TEXT`.
+
+3. **Apply Labeling Functions**
+
+   * Loaded raw data (`ade_gold_subset_20k.csv`).
+   * Used `PandasLFApplier` to apply all labeling functions on each row:
+
+     ```python
+     L_train = applier.apply(df)
+     ```
+   * Produced a **label matrix** (`L_train`) where each row corresponds to a data sample and each column to an LF’s label output.
+
+4. **Train Snorkel Label Model**
+
+   * Initialized and trained Snorkel’s **LabelModel** to estimate the true label distribution:
+
+     ```python
+     label_model.fit(L_train=L_train, n_epochs=500, log_freq=100, seed=42)
+     ```
+   * The LabelModel learns **LF accuracies and correlations**, generating probabilistic labels.
+
+5. **Generate Weak Labels & Probabilities**
+
+   * Computed **class probabilities** (`predict_proba`) for each sample.
+   * Assigned **hard labels** using `predict`.
+   * Appended new columns to the DataFrame:
+
+     * `weak_label_prob_SEVERE`, `weak_label_prob_MODERATE`, `weak_label_prob_MILD`
+     * `weak_label_id`, `weak_label`
+
+6. **Save Final Dataset**
+
+   * Exported the enriched dataset (original data + weak labels + probabilities) to:
+
+     ```bash
+     dataset_with_weaklabels.csv
+     ```
+
+---
+
+✅ **In summary:**
+
+> Defined domain-specific labeling rules → Applied them to raw ADE data → Trained Snorkel’s LabelModel to combine noisy signals → Generated probabilistic and hard weak labels for severity classification.
+
+---
+
+Would you like me to format this into a short “Methods” section (2–3 sentences) suitable for your ADEGuard paper/report?
