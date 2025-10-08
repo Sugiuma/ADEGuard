@@ -30,13 +30,17 @@ pip install -r requirements.txt
 ```
 2a. Update your model_paths  in config file.
 
-3. Run predictions
+3a. Run predictions on NER model
 
 ```bash
 python inference.py
 ```
-   
-4. Run inference on a CSV batch_inference:
+3b. Run predictions on Severity classifier model
+
+```bash
+python batch_inference_severity.py
+```
+4. Run inference on a CSV batch_inference for NER model:
 
 ```bash
 python batch_inference.py --input_csv batch_input.csv --output_csv predicted_entities.csv
@@ -51,7 +55,7 @@ python batch_inference.py --input_csv batch_input.csv --output_csv predicted_ent
 streamlit run app.py
 ```
    
-Upload sample1.csv conatining `symptom_text`, `age`, `severity columns`. (Check for sample in `data` folder in this repo)
+Upload sample1.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo)
 
 
 Perfect! Here's a **Streamlit tab-focused Mermaid.js flow** that’s compact and maps directly to your UI tabs:
