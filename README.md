@@ -71,15 +71,16 @@ B --> D[Clustering:Interactive Plots]
 
 
 %% Severity Tab
-B --> G[BioBERT Severity Classifier]
-
+A --> G[BioBERT Severity Classifier]
+G --> D
 
 %% Explainability Tab
 G --> J[SHAP Explanations]
 
 %% Streamlit Dashboard Integration
-C --> L[Streamlit Dashboard]
-
+C --> L[Clinical Insights Dashboard]
+D --> L
+J --> L
 ```
 
 ### **How it maps to your Streamlit app**
