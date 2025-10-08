@@ -67,18 +67,15 @@ A[Raw VAERS Reports] --> B[BioBERT NER: Extract ADE/Drug Spans]
 B --> C[NER Tab: Token-level Highlights]
 
 %% Clustering Tab
-B --> D[Modifier Detection & Age Bucketing]
-D --> E[Clustering: ADE Embeddings + Modifier + Age]
-E --> F[Clustering Tab: Interactive Plots]
+B --> D[Clustering:Interactive Plots]
+
 
 %% Severity Tab
-B --> G[Snorkel Weak Labeling]
-G --> H[BioBERT Severity Classifier]
-H --> I[Severity Tab: Predictions + Probabilities]
+B --> G[BioBERT Severity Classifier]
+
 
 %% Explainability Tab
-I --> J[SHAP / LIME Explanations]
-J --> K[Explainability Tab]
+G --> J[SHAP Explanations]
 
 %% Streamlit Dashboard Integration
 C --> L[Streamlit Dashboard]
