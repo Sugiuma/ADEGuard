@@ -4,13 +4,15 @@
 
 [NER Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/classif_report.png)
 
+[NER Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/NER_Model_Card.md)
+
 [Severity Classifier Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/trainin_sev.png)
 
 [Severity Classifier Classification Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/class_rep_seve.png)
 
-[Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
+[Severity Classifier Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Severity_classifier_model_Card.md)
 
-[Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Model_Card.md)
+[Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
 
 [Project pipeline](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Pipeline.md)
 
