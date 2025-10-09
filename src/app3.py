@@ -25,7 +25,7 @@ st.subheader("Hybrid ADE Detection & Severity Analysis")
 # -----------------------------------------------------------
 # Sidebar: Upload CSV
 # -----------------------------------------------------------
-st.sidebar.header("Upload CSV File")
+st.sidebar.markdown("Upload CSV File")
 uploaded_file = st.sidebar.file_uploader("Upload CSV with columns 'symptom_text' and 'AGE'", type=["csv"])
 if uploaded_file is None:
     st.info("👈 Please upload a CSV file to start analysis.")
@@ -65,119 +65,233 @@ df["age_group"] = df["age"].apply(age_group)
 # -----------------------------------------------------------
 # Tabs
 # -----------------------------------------------------------
-tabs = st.tabs(["NER", "Severity Prediction & Explainability" ,"Clustering"])
+tabs = st.tabs(["Named Entity Recognition", "Severity Classification & Explainability" ,"Clustering","📊 Clinical ADE Insights Dashboard"])
 
 # -----------------------------------------------------------
 # 1️⃣ NER Tab
 # -----------------------------------------------------------
 with tabs[0]:
-        st.subheader("ADE/DRUG Detection - Named Entity Recognition")
-         # -----------------------------
-        # 3️⃣ Load BioBERT NER
-        # -----------------------------
-      
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
-        model = AutoModelForTokenClassification.from_pretrained(model_path)
-        model.eval()
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        model.to(device)
+    st.subheader("ADE/DRUG Detection - Named Entity Recognition")
 
-        label_list = ["B-ADE", "B-DRUG", "I-ADE", "I-DRUG", "O"]
-        id2label = {i: label for i, label in enumerate(label_list)}
+    # -----------------------------
+    # 1️⃣ Load BioBERT NER
+    # -----------------------------
+    # ✅ Define device first
+    from transformers import AutoTokenizer, AutoModelForTokenClassification
+    import torch
 
-        @st.cache_data(show_spinner=False)
-        def predict_entities(texts):
-            all_entities, all_highlights = [], []
+    #model_path = "path/to/your/model"
 
-            for text in texts:
-                tokens = re.findall(r"\w+|[^\w\s]", text)
-                encoded = tokenizer(tokens, is_split_into_words=True,
-                                    truncation=True, max_length=512, return_tensors="pt").to(device)
+    # ✅ Step 1: define device FIRST
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-                with torch.no_grad():
-                    outputs = model(**encoded)
-                    predictions = torch.argmax(outputs.logits, dim=-1)[0].cpu().numpy()
+    # ✅ Step 2: load tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-                word_ids = encoded.word_ids(batch_index=0)
-                pred_labels = []
-                previous_word_idx = None
+    # ✅ Step 3: load model WITHOUT moving it yet
+    model = AutoModelForTokenClassification.from_pretrained(
+        model_path,
+        torch_dtype=torch.float32,
+        low_cpu_mem_usage=False,  # ensures full weight load
+    )
 
-                for idx, word_idx in enumerate(word_ids):
-                    if word_idx is None or word_idx == previous_word_idx:
-                        continue
-                    label = id2label[predictions[idx]]
-                    pred_labels.append((tokens[word_idx], label))
-                    previous_word_idx = word_idx
+    # ✅ Step 4: move to device
+    model = model.to(device)
 
-                # -----------------------------
-                # Merge B/I tokens into entities
-                # -----------------------------
-                entities = {"DRUG": [], "ADE": []}
-                current_entity, current_words = None, []
+    model.eval()
+    print(f"✅ Model loaded successfully on {device}")
 
-                for w, l in pred_labels:
-                    if l.startswith("B-") or l.startswith("I-"):
-                        entity_type = l.split("-")[1]
-                        if current_entity == entity_type:
-                            current_words.append(w)
-                        else:
-                            if current_entity and current_words:
-                                entities[current_entity].append(" ".join(current_words))
-                            current_entity = entity_type
-                            current_words = [w]
+
+
+    label_list = ["B-ADE", "B-DRUG", "I-ADE", "I-DRUG", "O"]
+    id2label = {i: label for i, label in enumerate(label_list)}
+
+    # -----------------------------
+    # 2️⃣ Post-processing dictionary
+    # -----------------------------
+    POSTPROCESS_DICT = {
+        "DRUG": {"pfizer", "moderna", "astrazeneca", "covaxin",
+                 "janssen", "johnson", "johnson and johnson", "biontech", "covishield"},
+         "ADE": {
+            # Core ADEs
+            "fever", "headache", "dizziness", "nausea", "rash", "fatigue",
+            "chills", "itching", "sweating", "chest pain", "pain", "body ache",
+            "swelling", "redness", "muscle pain", "joint pain", "vomiting","discomfort",
+            # Extended variants & synonyms
+            "chest discomfort", "bodyache", "injection site pain",
+            "injection site swelling", "injection site redness", 
+            "arm pain", "arm soreness", "muscle soreness", "weakness",
+            "tingling", "numbness", "fainting", "shortness of breath",
+            "palpitations", "blurred vision", "abdominal pain",
+            "stomach ache", "loss of appetite", "pain at injection site",
+            "burning sensation", "injection site tenderness"
+        }
+        #"ADE": {"fever", "headache", "dizziness", "nausea",
+        #        "rash", "fatigue", "chills", "itching", "sweating", "chest pain","pain", "body ache",
+        #        "swelling", "redness", "muscle pain", "joint pain", "vomiting"}
+    }
+
+    def normalize(text):
+        text = text.lower()
+        text = re.sub(r"[^a-z0-9\s]", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        return text
+
+    def postprocess_entities(text, entities):
+        """Add missed entities using dictionary match (case-consistent)"""
+        new_entities = {"DRUG": list(entities["DRUG"]), "ADE": list(entities["ADE"])}
+        text_norm = normalize(text)
+
+        for ent_type, vocab in POSTPROCESS_DICT.items():
+            for word in vocab:
+                word_norm = normalize(word)
+                if word_norm in text_norm and not any(word_norm in normalize(e) for e in new_entities[ent_type]):
+                    new_entities[ent_type].append(word)
+        return new_entities
+
+    def clean_entities(entities):
+        cleaned = {"DRUG": [], "ADE": []}
+        for ade in entities.get("ADE", []):
+            ade = ade.strip("., ")
+            if ade and ade.lower() not in ["and", "reported", "later", "severe"]:
+                cleaned["ADE"].append(ade)
+        for drug in entities.get("DRUG", []):
+            drug = re.sub(r"\band\b.*", "", drug)
+            drug = drug.strip("., ")
+            if re.search(r"[A-Z]", drug) or drug.lower() in POSTPROCESS_DICT["DRUG"]:
+                cleaned["DRUG"].append(drug)
+        return cleaned
+
+    # -----------------------------
+    # 3️⃣ NER + Postprocess Prediction
+    # -----------------------------
+    @st.cache_data(show_spinner=False)
+    def predict_entities(texts):
+        all_entities, all_highlights = [], []
+
+        for text in texts:
+            tokens = re.findall(r"\w+|[^\w\s]", text)
+            encoded = tokenizer(tokens, is_split_into_words=True,
+                                truncation=True, max_length=512, return_tensors="pt").to(device)
+
+            with torch.no_grad():
+                outputs = model(**encoded)
+                probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+                confs, preds = torch.max(probs, dim=-1)
+                predictions = preds[0].cpu().numpy()
+                confidences = confs[0].cpu().numpy()
+
+            word_ids = encoded.word_ids(batch_index=0)
+            pred_labels = []
+            previous_word_idx = None
+
+            for idx, word_idx in enumerate(word_ids):
+                if word_idx is None or word_idx == previous_word_idx:
+                    continue
+                label = id2label[predictions[idx]]
+                conf = float(confidences[idx])
+                pred_labels.append((tokens[word_idx], label, conf))
+                previous_word_idx = word_idx
+
+            # Merge contiguous entities
+            entities = {"DRUG": [], "ADE": []}
+            current_entity, current_words = None, []
+
+            for w, l, conf in pred_labels:
+                if l.startswith("B-") or l.startswith("I-"):
+                    entity_type = l.split("-")[1]
+                    if current_entity == entity_type:
+                        current_words.append(w)
                     else:
                         if current_entity and current_words:
                             entities[current_entity].append(" ".join(current_words))
-                        current_entity, current_words = None, []
+                        current_entity = entity_type
+                        current_words = [w]
+                else:
+                    if current_entity and current_words:
+                        entities[current_entity].append(" ".join(current_words))
+                    current_entity, current_words = None, []
 
-                if current_entity and current_words:
-                    entities[current_entity].append(" ".join(current_words))
+            if current_entity and current_words:
+                entities[current_entity].append(" ".join(current_words))
 
-                # Direct output (no fuzzy normalization)
-                all_entities.append((entities.get("ADE", []), entities.get("DRUG", [])))
-                all_highlights.append(pred_labels)
+            # Clean and postprocess entities
+            entities_clean = clean_entities(entities)
+            entities_final = postprocess_entities(text, entities_clean)
 
-            return all_entities, all_highlights
+            all_entities.append((entities_final.get("ADE", []), entities_final.get("DRUG", [])))
+            all_highlights.append(pred_labels)
 
-        # Run prediction
-        st.info("Extracting ADE/Drug entities using BioBERT...")
-        entity_results, highlights = predict_entities(df["symptom_text"].tolist())
+        return all_entities, all_highlights
 
-        # Add to DataFrame
-        df["ADE"], df["DRUG"] = zip(*entity_results)
-        df["ADE"] = df["ADE"].apply(lambda x: ", ".join(x) if x else "None")
-        df["DRUG"] = df["DRUG"].apply(lambda x: ", ".join(x) if x else "None")
-        df["highlights"] = highlights
+    # -----------------------------
+    # 4️⃣ Run NER + Dictionary Correction
+    # -----------------------------
+    st.info("Extracting ADE/Drug entities using BioBERT")
+    entity_results, highlights = predict_entities(df["symptom_text"].tolist())
 
-        
+    df["ADE"], df["DRUG"] = zip(*entity_results)
 
-        # -----------------------------
-        # 4️⃣ Display Final Output
-        # -----------------------------
-        st.success("✅ Entity Extraction Complete!")
-        st.dataframe(df[["symptom_text", "age_group", "ADE", "DRUG"]].head(10))
+    # -----------------------------
+    # 4️⃣a Add dictionary highlights for token visualization
+    # -----------------------------
+    def add_dict_highlights(row):
+        extra_highlights = list(row["highlights"])
+        text_tokens = [t for t, _, _ in extra_highlights]
+        text_lower = [t.lower() for t in text_tokens]
 
-        # -----------------------------
-        # 5️⃣ Token-Level Highlight Example
-        # -----------------------------
-       
-        st.subheader("Token-Level ADE/Drug Highlights")
-        row_idx = st.number_input("Select Row Index to Highlight Tokens", min_value=0, max_value=len(df)-1, value=0)
+        # Helper to mark a span of tokens
+        def mark_span(start_idx, end_idx, tag):
+            for i in range(start_idx, end_idx + 1):
+                tok, old_tag, conf = extra_highlights[i]
+                if old_tag == "O":
+                    extra_highlights[i] = (tok, tag, conf)
 
-        highlight_row = df.iloc[row_idx]
-        html_text = ""
-        for token, tag in highlight_row["highlights"]:
-            color = "#ffcccc" if tag in ["B-ADE", "I-ADE"] else "#cce5ff" if tag in ["B-DRUG","I-DRUG"] else "white"
-            html_text += f'<span style="background-color:{color};padding:2px;margin:1px;border-radius:2px;">{escape(token)}</span> '
+        # ADE highlights
+        for ade in row["ADE"]:
+            ade_tokens = ade.lower().split()
+            n = len(ade_tokens)
+            for i in range(len(text_lower) - n + 1):
+                if text_lower[i:i+n] == ade_tokens:
+                    mark_span(i, i+n-1, "B-ADE")
 
-        st.markdown(html_text, unsafe_allow_html=True)
+        # DRUG highlights
+        for drug in row["DRUG"]:
+            drug_tokens = drug.lower().split()
+            n = len(drug_tokens)
+            for i in range(len(text_lower) - n + 1):
+                if text_lower[i:i+n] == drug_tokens:
+                    mark_span(i, i+n-1, "B-DRUG")
 
-        # -----------------------------
-        # 6️⃣ Optional Download
-        # -----------------------------
-        if st.button("💾 Download Processed CSV"):
-            csv_data = df.to_csv(index=False).encode("utf-8")
-            st.download_button("Download CSV", data=csv_data, file_name="ade_drug_extracted.csv")
+        return extra_highlights
+
+    df["highlights"] = highlights
+    df["highlights"] = df.apply(add_dict_highlights, axis=1)
+
+    # -----------------------------
+    # 5️⃣ Display Results
+    # -----------------------------
+    st.success("✅ Entity Extraction Complete!")
+    # Show "None" for no ADE/DRUG detected
+    df["ADE"] = df["ADE"].apply(lambda x: ", ".join(x) if x else "None")
+    df["DRUG"] = df["DRUG"].apply(lambda x: ", ".join(x) if x else "None")
+
+    st.dataframe(df[["symptom_text", "age_group", "ADE", "DRUG"]].head(20))
+
+    # Token-level highlights
+    st.subheader("Token-Level ADE/Drug Highlights")
+    row_idx = st.number_input("Select Row Index to Highlight Tokens", min_value=0, max_value=len(df)-1, value=0)
+
+    highlight_row = df.iloc[row_idx]
+    html_text = ""
+    for token, tag, conf in highlight_row["highlights"]:
+        color = "#ffcccc" if tag in ["B-ADE", "I-ADE"] else "#cce5ff" if tag in ["B-DRUG", "I-DRUG"] else "white"
+        tooltip = f"{tag} ({conf*100:.1f}%)" if tag != "O" else ""
+        html_text += f'<span title="{tooltip}" style="background-color:{color};padding:2px;margin:1px;border-radius:2px;">{escape(token)}</span> '
+
+    st.markdown(html_text, unsafe_allow_html=True)
+
+
 
 
 # ==================================================
@@ -205,7 +319,10 @@ with tabs[1]:
             model=model,
             tokenizer=tokenizer,
             return_all_scores=True,
-            device=0 if torch.cuda.is_available() else -1
+            device=0 if torch.cuda.is_available() else -1,
+            truncation=True,         # ✅ truncate long inputs
+            max_length=512,          # ✅ limit to 512 tokens
+            padding=True 
         )
 
         id2label = {0: "Severe", 1:"Moderate", 2: "Mild"}
@@ -237,10 +354,14 @@ with tabs[1]:
         def get_explainer(_pipeline_model):
             return shap.Explainer(_pipeline_model)
 
-        def st_shap(js_html, height=300):
-            shap_html = f"<head>{shap.getjs()}</head><body>{js_html}</body>"
+        #def st_shap(js_html, height=300):
+        #    shap_html = f"<head>{shap.getjs()}</head><body>{js_html}</body>"
+        #    components.html(shap_html, height=height)
+        def st_shap(plot_html, height=300):
+            """Render SHAP plots inside Streamlit properly."""
+            shap_html = f"<head>{shap.getjs()}</head><body>{plot_html}</body>"
             components.html(shap_html, height=height)
-
+        
         explainer = get_explainer(clf)
 
         row_idx = st.number_input(
@@ -345,48 +466,129 @@ with tabs[2]:
     label2level = {"severe": "high", "moderate": "medium","mild": "low"}
 
     def hybrid_severity_explain(text):
-        """Combine classifier + rule-based fallback with explainability"""
+        """Combine classifier + rule-based override for strong severity cues"""
         text_low = text.lower()
+        classifier_label = "unknown"
+        source = "rule-based"
 
+        # --- Run classifier if available ---
         if clf:
             try:
                 preds = clf(text)
                 pred_idx = int(np.argmax([d["score"] for d in preds[0]]))
                 label = id2label.get(pred_idx, "Unknown").lower()
                 if label in label2level:
-                    return label2level[label], "classifier"
+                    classifier_label = label2level[label]
+                    source = "classifier"
             except Exception:
                 pass
 
-        if any(w in text_low for w in ["severe", "hospitalized", "death", "critical"]):
-            return "high", "rule-based"
-        elif any(w in text_low for w in ["moderate", "treatment", "clinic", "significant", "persistent"]):
-            return "medium", "rule-based"
-        elif any(w in text_low for w in ["mild", "slight", "minor"]):
-            return "low", "rule-based"
+        # --- Rule-based detection ---
+        if any(w in text_low for w in [
+            "severe", "high", "very severe", "serious", "critical", "acute", "intense", "extreme",
+            "life-threatening", "fatal", "deadly", "lethal", "grave", "profound", "excruciating",
+            "unbearable", "debilitating", "disabling", "sharp", "stabbing", "burning", "throbbing",
+            "violent", "hospitalized", "admitted", "icu", "emergency", "urgent", "unresponsive",
+            "worsening", "deteriorating", "progressive", "aggravated", "terminal", "end-stage",
+            "death", "deceased", "fatality"
+        ]):
+            rule_label = "high"
+        elif any(w in text_low for w in [
+            "moderate", "average", "medium", "noticeable", "persistent", "significant", "sustained",
+            "ongoing", "recurrent", "prolonged", "moderate pain", "moderate swelling", "non-critical",
+            "controlled", "stable", "symptomatic", "continuing"
+        ]):
+            rule_label = "medium"
+        elif any(w in text_low for w in [
+            "mild", "slight", "minimal", "light", "minor", "faint", "tolerable", "transient",
+            "temporary", "local", "small", "limited", "low", "short-term", "negligible", "occasional",
+            "manageable", "brief", "minor irritation", "mild discomfort"
+        ]):
+            rule_label = "low"
+        else:
+            rule_label = "unknown"
 
-        return "unknown", "rule-based"
+        # --- Combine classifier + rule-based results ---
+        priority = {"low": 1, "medium": 2, "high": 3, "unknown": 0}
 
-    # --- Apply hybrid severity ---
-    results = df["symptom_text"].apply(hybrid_severity_explain)
-    df[["modifier", "severity_source"]] = pd.DataFrame(results.tolist(), index=df.index)
+        if priority[rule_label] > priority[classifier_label]:
+            return rule_label, "rule-based override"
+        else:
+            return classifier_label, source
 
     # --- Clustering ---
     n_samples = len(df)
     n_clusters = min(3, n_samples)
     perplexity = max(2, min(30, (n_samples - 1) / 3))
 
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    df["cluster"] = kmeans.fit_predict(embeddings)
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.cluster import KMeans
+    import numpy as np
+
+    def perform_weighted_clustering(df, n_clusters=None, severity_weight=2.5):
+        """
+        Perform KMeans clustering with weighted severity.
+        """
+        # --- Convert severity labels to numeric scores ---
+        severity_map = {"low": 1, "medium": 2, "high": 3}
+        df["severity_score"] = df["modifier"].map(severity_map).fillna(2)
+
+        # --- Prepare features ---
+        # Example ADE vectorization (basic)
+        # If you already have embedding/encoded ADEs, use those instead.
+        ade_encoded = pd.get_dummies(df["ADE"].astype(str), prefix="ADE")
+
+        # Weighted severity
+        df["weighted_severity"] = df["severity_score"] * severity_weight
+
+        # Combine features
+        X = pd.concat([df[["age", "weighted_severity"]], ade_encoded], axis=1)
+
+        # --- Standardize ---
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
+        # --- Define cluster count dynamically ---
+        if n_clusters is None:
+            n_clusters = min(5, len(df) - 1)
+
+        # --- KMeans ---
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        df["cluster"] = kmeans.fit_predict(X_scaled)
+
+        return df, kmeans
+
+    # --- Apply hybrid severity ---
+    results = df["symptom_text"].apply(hybrid_severity_explain)
+    df[["modifier", "severity_source"]] = pd.DataFrame(results.tolist(), index=df.index)
+
+    
+
+    df, kmeans_model = perform_weighted_clustering(df)
+
 
     tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity, max_iter=1000)
     X_tsne = tsne.fit_transform(embeddings)
     df["x"], df["y"] = X_tsne[:, 0], X_tsne[:, 1]
 
-    # --- Hover text and plot ---
+     # --- Create descriptive cluster labels for clinicians ---
+    cluster_summary = (
+        df.groupby("cluster")
+          .agg({
+              "modifier": lambda x: x.mode()[0] if not x.mode().empty else "unknown",
+              "age_group": lambda x: x.mode()[0] if not x.mode().empty else "unknown"
+          })
+          .reset_index()
+    )
+    cluster_summary["Cluster_Label"] = cluster_summary.apply(
+        lambda r: f"{r['modifier'].capitalize()} severity group ({r['age_group']})", axis=1
+    )
+    df = df.merge(cluster_summary[["cluster", "Cluster_Label"]], on="cluster", how="left")
+
+    # --- Hover text and plots ---
     df["hover_text"] = [
-        f"Entities: {ent}<br>Age: {age}<br>Severity: {mod}<br>Source: {src}"
-        for ent, age, mod, src in zip(df["entities_text"], df["age_group"], df["modifier"], df["severity_source"])
+        f"Entities: {ent}<br>Age: {age}<br>Severity: {mod}<br>Source: {src}<br>Cluster: {clab}"
+        for ent, age, mod, src, clab in zip(df["entities_text"], df["age_group"], df["modifier"], df["severity_source"], df["Cluster_Label"])
     ]
 
     fig = px.scatter(
@@ -395,34 +597,113 @@ with tabs[2]:
         y="y",
         color="modifier",
         hover_name="hover_text",
-        title="ADE/DRUG Clusters (Hybrid Severity with Explainability)",
+        title="Clusters by Severity",
         color_discrete_map={"low": "green", "medium": "orange", "high": "red"}
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # 2️⃣ Clusters by Severity
-    #with col2:
-    fig2 = px.scatter(
-        df, x="x", y="y", color="severity_source",
-        hover_name="hover_text",
-        color_continuous_scale="RdYlBu",
-        title="By Severity"
-    )
-    st.plotly_chart(fig2, use_container_width=True)
-
-    # 3️⃣ Clusters by Age Group
-    #with col3:
+    # --- By Age Group ---
     fig3 = px.scatter(
-        df, x="x", y="y", color="age_group",
+        df,
+        x="x",
+        y="y",
+        color="age_group",
         hover_name="hover_text",
         color_discrete_sequence=px.colors.qualitative.Set2,
-        title="By Age Group"
+        title="Clusters by Age Group"
     )
     st.plotly_chart(fig3, use_container_width=True)
 
-    # --- Summary table ---
-    st.markdown("Cluster Summary")
-    summary = df.groupby(["cluster", "modifier", "severity_source"]).size().reset_index(name="count")
-    st.dataframe(summary)
-    st.dataframe(df)
-print(df)
+    # --- Cluster Summary ---
+    st.markdown("### 🧩 Cluster Summary")
+    st.dataframe(cluster_summary)
+
+    st.session_state["clustered_df"] = df  # ✅ Store for next tab
+
+
+
+
+# --- TAB 2: Clinical Insights Dashboard ---
+with tabs[3]:
+    st.subheader("📊 Clinical ADE Insights Dashboard")
+    st.markdown("""
+    This dashboard helps clinical teams explore AI-classified adverse drug events 
+    by drug, ade, severity, and age group.
+    """)
+
+    # --- Load clustered data from Tab 2 ---
+    df_exp = st.session_state.get("clustered_df", df).copy()
+
+    # --- Explode list columns ---
+    for col in ["DRUG", "ADE"]:
+        df_exp[col] = df_exp[col].apply(lambda x: x if isinstance(x, list) else [x])
+        df_exp = df_exp.explode(col)
+
+    # --- Filters ---
+    col1, col2, col3 = st.columns(3)
+    unique_drugs = sorted(df_exp["DRUG"].dropna().unique())
+    selected_drug = col1.selectbox("Select a Drug", ["All"] + unique_drugs)
+
+    unique_ade = sorted(df_exp["ADE"].dropna().unique())
+    selected_ade = col2.selectbox("Select an ADE", ["All"] + unique_ade)
+
+    unique_clusters = sorted(df_exp["Cluster_Label"].dropna().unique())
+    selected_cluster = col3.selectbox("Select Cluster", ["All"] + unique_clusters)
+
+    # --- Apply Filters ---
+    filtered_df = df_exp.copy()
+    if selected_drug != "All":
+        filtered_df = filtered_df[filtered_df["DRUG"] == selected_drug]
+    if selected_ade != "All":
+        filtered_df = filtered_df[filtered_df["ADE"] == selected_ade]
+    if selected_cluster != "All":
+        filtered_df = filtered_df[filtered_df["Cluster_Label"] == selected_cluster]
+
+    # --- Charts ---
+    col1, col2 = st.columns(2)  # Create two columns
+
+    with col1:
+        st.subheader("📈 Severity Distribution")
+        st.bar_chart(filtered_df["modifier"].value_counts())
+
+    with col2:
+        st.subheader("👥 Age Group Distribution")
+        st.bar_chart(filtered_df["age_group"].value_counts())
+
+    # --- Data Preview ---
+    st.subheader("📄 Filtered Case Details")
+    st.dataframe(filtered_df[["symptom_text", "age", "age_group", "ADE", "DRUG", "modifier", "Cluster_Label"]].head(20))
+
+    
+
+    # --- Clinical Summary Table ---
+    def generate_clinical_summary(df_input):
+        df_sum = df_input.copy()
+        for col in ["DRUG", "ADE"]:
+            df_sum[col] = df_sum[col].apply(lambda x: x if isinstance(x, list) else [x])
+            df_sum = df_sum.explode(col)
+        summary = df_sum.groupby(["Cluster_Label", "DRUG", "ADE"]).size().reset_index(name="case_count")
+        return summary
+
+    clinical_summary = generate_clinical_summary(filtered_df)
+
+    st.subheader("📋 Clinical Summary Table")
+    st.dataframe(clinical_summary)
+
+    # --- Downloads ---
+    st.sidebar.markdown("### 📥 Download Clinical Data")
+
+    raw_csv = (
+        filtered_df.rename(columns={"modifier": "severity"})[
+            ["symptom_text", "age", "age_group", "ADE", "DRUG", "severity", "Cluster_Label"]
+        ]
+        .to_csv(index=False)
+        .encode("utf-8")
+    )
+
+    st.sidebar.download_button("Download Filtered Cases CSV", raw_csv, file_name="filtered_cases.csv")
+
+    summary_csv = clinical_summary.to_csv(index=False).encode("utf-8")
+    st.sidebar.download_button("Download Clinical Summary CSV", summary_csv, file_name="clinical_summary.csv")
+
+    st.sidebar.success("✅ Clustering complete — Data ready for clinical analysis!")
