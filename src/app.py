@@ -8,9 +8,13 @@ import matplotlib.pyplot as plt
 from html import escape
 import torch,re
 import plotly.express as px
-from config import model_path,C_MODEL_PATH
+
 import numpy as np
 import shap
+import streamlit.components.v1 as components
+from sklearn.preprocessing import StandardScaler
+    
+from config import model_path,C_MODEL_PATH
 
 # -----------------------------------------------------------
 # Streamlit Config
@@ -78,7 +82,9 @@ with tabs[0]:
     from transformers import AutoTokenizer, AutoModelForTokenClassification
     import torch
 
-      # ✅ Step 1: define device FIRST
+    #model_path = "path/to/your/model"
+
+    # ✅ Step 1: define device FIRST
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # ✅ Step 2: load tokenizer
@@ -337,14 +343,8 @@ with tabs[1]:
         st.markdown("Classifier Predictions")
         st.dataframe(df[["symptom_text", "pred_label"]])
 
-      # --- SHAP explainability ---
-        # --- SHAP Explainability Section ---
-        # SHAP explainability section (updated for Streamlit)
         # --- SHAP explainability section ---
-        import shap
-        import streamlit.components.v1 as components
-        import numpy as np
-        import pandas as pd
+        
 
         @st.cache_resource(show_spinner=False)
         def get_explainer(_pipeline_model):
@@ -517,9 +517,8 @@ with tabs[2]:
     n_clusters = min(3, n_samples)
     perplexity = max(2, min(30, (n_samples - 1) / 3))
 
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.cluster import KMeans
-    import numpy as np
+  
+   
 
     def perform_weighted_clustering(df, n_clusters=None, severity_weight=2.5):
         """
@@ -530,8 +529,6 @@ with tabs[2]:
         df["severity_score"] = df["modifier"].map(severity_map).fillna(2)
 
         # --- Prepare features ---
-        # Example ADE vectorization (basic)
-        # If you already have embedding/encoded ADEs, use those instead.
         ade_encoded = pd.get_dummies(df["ADE"].astype(str), prefix="ADE")
 
         # Weighted severity
@@ -703,4 +700,3 @@ with tabs[3]:
     st.sidebar.download_button("Download Clinical Summary CSV", summary_csv, file_name="clinical_summary.csv")
 
     st.sidebar.success("✅ Clustering complete — Data ready for clinical analysis!")
-
