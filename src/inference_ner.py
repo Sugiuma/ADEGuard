@@ -18,9 +18,20 @@ model.to(device)
 POSTPROCESS_DICT = {
     "DRUG": {"pfizer", "moderna", "astrazeneca", "covaxin",
              "janssen", "johnson", "johnson and johnson", "biontech", "covishield"},
-    "ADE": {"fever", "headache", "dizziness", "nausea",
-            "rash", "fatigue", "chills", "itching", "sweating",
-            "chest pain"}
+    "ADE": {
+             # Core ADEs
+            "fever", "headache", "dizziness", "nausea", "rash", "fatigue",
+            "chills", "itching", "sweating", "chest pain", "pain", "body ache",
+            "swelling", "redness", "muscle pain", "joint pain", "vomiting","discomfort",
+            # Extended variants & synonyms
+            "chest discomfort", "bodyache", "injection site pain",
+            "injection site swelling", "injection site redness", 
+            "arm pain", "arm soreness", "muscle soreness", "weakness",
+            "tingling", "numbness", "fainting", "shortness of breath",
+            "palpitations", "blurred vision", "abdominal pain",
+            "stomach ache", "loss of appetite", "pain at injection site",
+            "burning sensation", "injection site tenderness"
+        }
 }
 
 def normalize(text):
@@ -164,3 +175,4 @@ if __name__ == "__main__":
     ]
 
     predict_entities(sentences)
+
