@@ -26,6 +26,9 @@ https://drive.google.com/drive/folders/1oB6GrNepkSnDQxPUzDII6L7zJ06TvKU_?usp=dri
 Severity Classifier model
 https://drive.google.com/drive/folders/1Ay5FCmKnO2Q-RsL-1UT4TmkZSYKPoIjU?usp=sharing
 
+Dataset used:
+https://drive.google.com/drive/folders/1lLjR6yAmQdRTYWaVHkrgDDhRzQEgwvmE?usp=drive_link
+
 ## **Steps**
 1. Clone the repo & Set up virtual environment.
    
