@@ -13,4 +13,5 @@ numba>=0.57.2
 llvmlite>=0.41.0
 fuzzywuzzy>=0.18.0
 python-levenshtein>=0.21.0
-sentence_transformers
+sentence-transformers>=2.2.2
+snorkel>=0.9.10
