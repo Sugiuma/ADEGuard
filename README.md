@@ -39,12 +39,12 @@ pip install -r requirements.txt
 ```
 2a. cd src/ and Update your model_paths  in config file.
 
-3. Run predictions on NER model
+3. Run predictions on NER model (optional)
 
 ```bash
 python inference_ner.py
 ```
-4. Run predictions on Severity classifier model
+4. Run predictions on Severity classifier model (optional)
 
 ```bash
 python inference_severity.py
@@ -56,7 +56,7 @@ python inference_severity.py
 streamlit run app.py
 ```
    
-Upload sample2.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo)
+Upload sample2.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo). Also contains the final csv reports.
 
 ### Architecture of ADEGuard
 
@@ -87,12 +87,15 @@ J --> L
 | **Clustering Tab**     | Show modifier-aware + age-aware ADE clusters with interactive plots.                        |
 | **Clinical Insights Tab**          | Combines all tabs for the full visualization experience & insights                       |
 
+### 🛠️ **Tech Stack**
 
-Excellent — this is exactly the kind of technical insight you can highlight in a **project write-up or research summary** under *“Efficient or Creative Approaches in Model Deployment and Optimization.”*
-
-Below is a set of **bullet points** covering freezing layers, Snorkel, and several other pre/post-processing and inference optimization techniques — phrased for inclusion in reports or presentations 👇
-
----
+* **Data**: VAERS dataset (COVID-19 subset), weak labels from structured fields
+* **Annotation**: Label Studio for gold standard ADE/DRUG span labeling
+* **NLP Models**: BioBERT for NER, Severity Classifier, Sentence-BERT for embeddings
+* **Clustering**: t-SNE + K means (modifier- & age-aware)
+* **Classification**: Rule-based + BioBERT severity classifier (Weak labeling using Snorkel)
+* **Explainability**: SHAP
+* **UI**: Streamlit dashboard with token-level highlights, cluster plots, explainability visualizations, Clinical Insights(downloadable as csv)
 
 ## ⚙️ **Efficient Approaches in Model Deployment & Optimization**
 
