@@ -27,6 +27,7 @@ This pipeline combines weak supervision, class balancing, and selective fine-tun
 ✅ **In short:**
 Snorkel was used to automatically infer **severity levels** (Severe, Moderate, Mild) from mixed structured + unstructured data, creating **weakly supervised training data** for the classifier — a scalable alternative to manual labeling.
 
+## **Streamlit Components**
 
 ## **Named Entity Recognition (NER)**
 
