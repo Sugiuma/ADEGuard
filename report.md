@@ -154,7 +154,7 @@ This helps identify population-specific ADE trends.
 | **1. NER**                       | BioBERT model               | Extract ADE and Drug entities     |
 | **2. Severity + Explainability** | Classifier + SHAP           | Predict and explain severity      |
 | **3. Clustering**                | SentenceTransformer + t-SNE | Visualize ADE similarity patterns |
-| **4. Clinical Insights Dashboard** | Dedicated view for clinical reviewers        |
+| **4. Clinical Insights Dashboard** | Combines all outputs | Dedicated view for clinical reviewers  |
 
 The dashboard provides both **automation** and **interpretability**, bridging the gap between AI and clinical reasoning.
 
