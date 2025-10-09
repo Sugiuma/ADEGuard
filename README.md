@@ -12,7 +12,7 @@
 
 [Severity Classifier Model Card](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Severity_classifier_model_card.md)
 
-[Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_Report.md)
+[Project Report](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Project_report.md)
 
 [Project pipeline](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Pipeline.md)
 
