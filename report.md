@@ -1,6 +1,4 @@
-# 🧠 ADEGuard: Hybrid Adverse Drug Event (ADE) Detection and Severity Analysis
-
----
+# 🧠 ADEGuard: Adverse Drug Event (ADE) Detection and Severity Analysis
 
 ## 🔷 1. Project Overview
 
@@ -14,10 +12,8 @@ It integrates three core AI capabilities into one interactive Streamlit dashboar
 
 This hybrid approach combines **data-driven NLP** with **explainable AI** to support clinical interpretation and pharmacovigilance.
 
----
 
 ## 🔷 2. System Architecture
-
 ### ⚙️ Overall Pipeline
 
 ```
@@ -44,10 +40,7 @@ This hybrid approach combines **data-driven NLP** with **explainable AI** to sup
    └─────────────────────────┘
 ```
 
----
-
 ## 🔷 3. Data Input and Preprocessing
-
 ### 📤 CSV Upload
 
 The user uploads a `.csv` file containing two columns:
@@ -66,16 +59,12 @@ A preprocessing function categorizes patients into:
 
 This enables **demographic analysis** of ADE severity patterns.
 
----
 
 ## 🔷 4. ADE/Drug Named Entity Recognition (NER)
-
 ### 📘 Model
-
 A **BioBERT Token Classification** model is used, fine-tuned on biomedical entity recognition tasks.
 
 ### ⚙️ Functionality
-
 * Tokenizes input text using BioBERT’s tokenizer.
 * Predicts token-level labels:
 
@@ -85,13 +74,11 @@ A **BioBERT Token Classification** model is used, fine-tuned on biomedical entit
 * Consecutive “B/I” tokens are merged to form complete entities (e.g., *“severe rash”*).
 
 ### 🧾 Output
-
 | symptom_text                   | age_group   | ADE   | DRUG        |
 | ------------------------------ | ----------- | ----- | ----------- |
 | “Fever after paracetamol dose” | Young Adult | Fever | Paracetamol |
 
 ### 💡 Visualization
-
 Each token is color-coded:
 
 * 🔴 **Red:** ADE tokens
@@ -99,90 +86,57 @@ Each token is color-coded:
 
 This provides an interpretable token-level visualization of model predictions.
 
----
-
 ## 🔷 5. Severity Classification
-
 ### 📘 Model
-
-A **Transformer-based Sequence Classification** model (e.g., DistilBERT / BioClinicalBERT) fine-tuned for ADE severity.
+A **Transformer-based Sequence Classification** model (BioBERT) fine-tuned for ADE severity.
 
 ### ⚙️ Prediction
-
 * Input: Symptom narrative text.
 * Output: Probability distribution across three classes — *Mild*, *Moderate*, *Severe*.
 * Highest-probability class is chosen as the predicted label.
 
-Example:
-
-```
-Input: "Patient hospitalized due to severe allergic reaction."
-Output: Severe (Confidence: 0.98)
-```
-
 ### 📊 Output Table
-
 | symptom_text                            | pred_label |
 | --------------------------------------- | ---------- |
 | “High fever and chills”                 | Moderate   |
 | “Slight pain at injection site”         | Mild       |
 | “Anaphylaxis requiring hospitalization” | Severe     |
 
----
+
 
 ## 🔷 6. Explainability using SHAP
-
-### 🧮 Motivation
 
 In healthcare AI, interpretability is crucial.
 SHAP (SHapley Additive exPlanations) quantifies each token’s contribution to the model’s decision.
 
 ### ⚙️ Process
-
 1. A SHAP explainer wraps the Hugging Face pipeline.
 2. For a selected text sample, SHAP computes **per-token importance values**.
 3. Tokens influencing the prediction more strongly receive higher SHAP values.
 
 ### 🎨 Visualization
-
 * Tokens are highlighted in shades of red proportional to their importance.
 * A bar chart displays top influential words.
 
-Example:
-
-```
-Text: “Severe chest pain and high fever after vaccination.”
-Tokens “severe” and “chest pain” show strongest positive SHAP values.
-```
 
 ### 📈 Output
-
 * **Heatmap:** Redder tokens = stronger contribution to "Severe".
 * **Bar Chart:** Word importance ranking for transparency.
 
----
-
 ## 🔷 7. Clustering and Pattern Discovery (Hybrid Analysis)
-
-*(From your extended code version)*
-
 ### 🧮 Embedding Model
-
 A **SentenceTransformer (all-MiniLM-L6-v2)** converts extracted entity text (ADE + DRUG) into dense embeddings.
 
 ### ⚙️ Clustering
-
 * K-Means groups similar ADE/Drug embeddings.
 * t-SNE reduces dimensions for visualization.
 * Clusters are visualized using Plotly.
 
 ### 🎨 Color Coding
-
 * Color = Severity (High / Medium / Low)
 * Hover Info = Entity details + Age group
 
 ### 🧠 Clinical Insight
-
 Doctors can observe clusters such as:
 
 * **Elderly + Severe Reactions** grouped together.
@@ -190,10 +144,7 @@ Doctors can observe clusters such as:
 
 This helps identify population-specific ADE trends.
 
----
-
 ## 🔷 8. Integrated Dashboard
-
 | **Tab**                          | **Module**                  | **Purpose**                       |
 | -------------------------------- | --------------------------- | --------------------------------- |
 | **1. NER**                       | BioBERT model               | Extract ADE and Drug entities     |
@@ -202,41 +153,28 @@ This helps identify population-specific ADE trends.
 
 The dashboard provides both **automation** and **interpretability**, bridging the gap between AI and clinical reasoning.
 
----
-
 ## 🔷 9. Key Strengths
-
 | Feature                        | Description                                                          |
 | ------------------------------ | -------------------------------------------------------------------- |
-| **Biomedical Language Models** | Domain-tuned BioBERT & ClinicalBERT models capture medical nuances.  |
+| **Biomedical Language Models** | Domain-tuned BioBERT models capture medical nuances.  |
 | **Explainable AI (SHAP)**      | Clinicians can see “why” a severity label was predicted.             |
 | **Age-aware Analysis**         | Adds demographic insight to ADE clustering.                          |
 | **Hybrid Rules + ML**          | Falls back to rule-based heuristics when model confidence is low.    |
 | **Interactive Visualization**  | Streamlit UI enables token-level, severity, and cluster exploration. |
 
----
 
 ## 🔷 10. Potential Applications
-
 * **Regulatory reporting** (FDA / EMA pharmacovigilance)
 * **Drug safety monitoring**
 * **Post-marketing surveillance**
 * **Clinical decision support**
 * **AI audit and transparency tools**
 
----
-
 ## 🔷 11. Future Enhancements
-
 * 🧠 **Multi-task Learning:** Joint NER + Severity prediction in a single model.
 * 📊 **Temporal ADE Analysis:** Track severity progression over time.
 * 🩺 **Knowledge Graph Integration:** Link ADEs with known drug safety profiles.
 * 🔍 **Zero-shot or few-shot models:** Adapt to unseen ADE types.
-
----
-
-Would you like me to generate a **formatted project report (PDF)** version next — with headings, numbered sections, and embedded diagrams (pipeline architecture + sample visual outputs placeholders)?
-It’ll be export-ready for submission or presentation slides.
 
 Perfect 🔥 — that’s exactly how to make your project **clinically interpretable and presentation-ready**.
 Let’s add a **new “📊 Clinical Insights Dashboard” tab** in your existing Streamlit app.
