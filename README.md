@@ -56,7 +56,7 @@ python inference_severity.py
 streamlit run app.py
 ```
    
-Upload sample1.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo)
+Upload sample2.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo)
 
 ### Architecture of ADEGuard
 
