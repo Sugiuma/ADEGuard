@@ -1,4 +1,4 @@
-# 🧠 ADEGuard: Adverse Drug Event (ADE) Detection and Severity Analysis
+## 🧠 ADEGuard: Adverse Drug Event (ADE) Detection and Severity Analysis
 
 ## 🔷 1. Project Overview
 
