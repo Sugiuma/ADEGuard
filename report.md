@@ -85,7 +85,7 @@ A **Transformer-based Sequence Classification** model (BioBERT) fine-tuned for A
 ### 📊 Output Table
 | symptom_text                            | pred_label |
 | --------------------------------------- | ---------- |
-| “High fever and chills”                 | Moderate   |
+| “Fever and chills”                 | Moderate   |
 | “Slight pain at injection site”         | Mild       |
 | “Anaphylaxis requiring hospitalization” | Severe     |
 
@@ -181,9 +181,4 @@ The dashboard provides both **automation** and **interpretability**, bridging th
 * 🩺 **Knowledge Graph Integration:** Link ADEs with known drug safety profiles.
 * 🔍 **Zero-shot or few-shot models:** Adapt to unseen ADE types.
 
-
-
-
-
----
 
