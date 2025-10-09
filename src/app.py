@@ -6,12 +6,10 @@ from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from html import escape
-from fuzzywuzzy import process, fuzz
 import torch,re
 import plotly.express as px
 from config import model_path,C_MODEL_PATH
 import numpy as np
-import plotly.express as px
 import shap
 
 # -----------------------------------------------------------
@@ -80,9 +78,7 @@ with tabs[0]:
     from transformers import AutoTokenizer, AutoModelForTokenClassification
     import torch
 
-    #model_path = "path/to/your/model"
-
-    # ✅ Step 1: define device FIRST
+      # ✅ Step 1: define device FIRST
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # ✅ Step 2: load tokenizer
@@ -707,3 +703,4 @@ with tabs[3]:
     st.sidebar.download_button("Download Clinical Summary CSV", summary_csv, file_name="clinical_summary.csv")
 
     st.sidebar.success("✅ Clustering complete — Data ready for clinical analysis!")
+
