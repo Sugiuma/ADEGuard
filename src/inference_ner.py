@@ -29,6 +29,7 @@ POSTPROCESS_DICT = {
             "arm pain", "arm soreness", "muscle soreness", "weakness",
             "tingling", "numbness", "fainting", "shortness of breath",
             "palpitations", "blurred vision", "abdominal pain",
+            "dead","death","fatal","fatality","deceased","passed away",
             "stomach ache", "loss of appetite", "pain at injection site",
             "burning sensation", "injection site tenderness"
         }
@@ -175,4 +176,5 @@ if __name__ == "__main__":
     ]
 
     predict_entities(sentences)
+
 
