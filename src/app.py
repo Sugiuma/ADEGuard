@@ -125,8 +125,8 @@ with tabs[0]:
             "arm pain", "arm soreness", "muscle soreness", "weakness",
             "tingling", "numbness", "fainting", "shortness of breath",
             "palpitations", "blurred vision", "abdominal pain",
-            "stomach ache", "loss of appetite", "pain at injection site",
-            "burning sensation", "injection site tenderness"
+            "stomach ache", "loss of appetite", "pain at injection site","passed away","died",
+            "burning sensation", "injection site tenderness","dead","death","fatal","fatality","deceased"
         }
         #"ADE": {"fever", "headache", "dizziness", "nausea",
         #        "rash", "fatigue", "chills", "itching", "sweating", "chest pain","pain", "body ache",
@@ -462,12 +462,22 @@ with tabs[2]:
     label2level = {"severe": "high", "moderate": "medium","mild": "low"}
 
     def hybrid_severity_explain(text):
-        """Combine classifier + rule-based override for strong severity cues"""
+        """
+        Hybrid severity classifier:
+        - Combines optional ML classifier + rule-based detection
+        - Handles:
+            • Severe symptoms of mild ADE → downgraded to medium
+            • Mild symptoms with persistent/significant context → upgraded to medium
+            • True high severity (hospitalization, death, life-threatening) → high
+            • Explicitly mild ADEs remain low
+        """
         text_low = text.lower()
         classifier_label = "unknown"
         source = "rule-based"
 
-        # --- Run classifier if available ---
+        # -----------------------------
+        # 1️⃣ Classifier prediction (if available)
+        # -----------------------------
         if clf:
             try:
                 preds = clf(text)
@@ -479,38 +489,78 @@ with tabs[2]:
             except Exception:
                 pass
 
-        # --- Rule-based detection ---
-        if any(w in text_low for w in [
-            "severe", "high", "very severe", "serious", "critical", "acute", "intense", "extreme",
-            "life-threatening", "fatal", "deadly", "lethal", "grave", "profound", "excruciating",
-            "unbearable", "debilitating", "disabling", "sharp", "stabbing", "burning", "throbbing",
-            "violent", "hospitalized", "admitted", "icu", "emergency", "urgent", "unresponsive",
-            "worsening", "deteriorating", "progressive", "aggravated", "terminal", "end-stage",
-            "death", "deceased", "fatality"
-        ]):
-            rule_label = "high"
+        # -----------------------------
+        # 2️⃣ Rule-based detection
+        # -----------------------------
+        high_keywords = [
+            "severe", "very severe", "serious", "critical", "acute", "intense", "extreme",
+            "life-threatening", "fatal", "deadly", "lethal", "grave", "profound",
+            "excruciating", "unbearable", "debilitating", "disabling",
+            "hospitalized", "admitted", "icu", "emergency", "urgent", "unresponsive",
+            "worsening", "deteriorating", "progressive", "aggravated",
+            "terminal", "end-stage", "passed away", "death", "deceased", "fatality"
+        ]
+
+        mild_terms = [
+            "fever", "vomiting", "nausea", "rash", "headache", "soreness",
+            "injection site pain", "chills", "tiredness", "body ache", "fatigue",
+            "dizziness", "swelling", "redness", "itching", "arm pain", "joint pain",
+            "muscle pain", "weakness", "malaise", "loss of appetite", "diarrhea",
+            "abdominal pain", "pain", "injection site"
+        ]
+
+        mild_keywords = [
+            "mild", "slight", "minimal", "light", "minor", "faint", "tolerable",
+            "transient", "temporary", "local", "small", "limited", "low", "short-term",
+            "negligible", "occasional", "manageable", "brief", "minor irritation",
+            "mild discomfort"
+        ]
+
+        rule_label = "unknown"
+
+        # --- High severity detection (downgrade mild symptoms if prefixed by 'severe') ---
+        if any(k in text_low for k in high_keywords):
+            if not any(f"severe {m}" in text_low for m in mild_terms):
+                rule_label = "high"
+            else:
+                rule_label = "medium"
+
+        # --- Medium severity keywords ---
         elif any(w in text_low for w in [
-            "moderate", "average", "medium", "noticeable", "persistent", "significant", "sustained",
-            "ongoing", "recurrent", "prolonged", "moderate pain", "moderate swelling", "non-critical",
-            "controlled", "stable", "symptomatic", "continuing"
+            "moderate", "average", "medium", "noticeable", "persistent", "significant",
+            "sustained", "ongoing", "recurrent", "prolonged", "controlled",
+            "stable", "symptomatic", "continuing", "non-critical"
         ]):
             rule_label = "medium"
-        elif any(w in text_low for w in [
-            "mild", "slight", "minimal", "light", "minor", "faint", "tolerable", "transient",
-            "temporary", "local", "small", "limited", "low", "short-term", "negligible", "occasional",
-            "manageable", "brief", "minor irritation", "mild discomfort"
-        ]):
-            rule_label = "low"
-        else:
-            rule_label = "unknown"
 
-        # --- Combine classifier + rule-based results ---
-        priority = {"low": 1, "medium": 2, "high": 3, "unknown": 0}
+        # --- Low severity detection (upgrade if context indicates persistence/significance) ---
+        elif any(w in text_low for w in mild_keywords):
+            if any(w in text_low for w in ["persistent", "prolonged", "recurrent", "noticeable", "significant"]):
+                rule_label = "medium"
+            else:
+                rule_label = "low"
+
+        # -----------------------------
+        # 3️⃣ De-escalation for common mild symptoms
+        # -----------------------------
+        # Only downgrade to medium if not explicitly marked 'mild'
+        if any(phrase in text_low for phrase in mild_terms) and not any(f"mild {m}" in text_low for m in mild_terms):
+            return "medium", "rule-based downgrade"
+
+        # -----------------------------
+        # 4️⃣ Combine classifier + rule-based results
+        # -----------------------------
+        priority = {"unknown": 0, "low": 1, "medium": 2, "high": 3}
 
         if priority[rule_label] > priority[classifier_label]:
             return rule_label, "rule-based override"
         else:
             return classifier_label, source
+
+
+                
+
+
 
     # --- Clustering ---
     n_samples = len(df)
