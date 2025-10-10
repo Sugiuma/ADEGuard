@@ -28,7 +28,7 @@ POSTPROCESS_DICT = {
             "injection site swelling", "injection site redness", 
             "arm pain", "arm soreness", "muscle soreness", "weakness",
             "tingling", "numbness", "fainting", "shortness of breath",
-            "palpitations", "blurred vision", "abdominal pain",
+            "palpitations", "blurred vision", "abdominal pain","died",
             "dead","death","fatal","fatality","deceased","passed away",
             "stomach ache", "loss of appetite", "pain at injection site",
             "burning sensation", "injection site tenderness"
@@ -171,10 +171,9 @@ if __name__ == "__main__":
         "After taking AstraZeneca vaccine, the patient experienced nausea and chest pain.",
         "He was given Covaxin but developed rash and severe itching.",
         "The subject reported fatigue, dizziness, and fever following the Pfizer booster.",
-        "Moderna shot was administered without immediate side effects.",
+        "Moderna shot was administered and he died.",
         "Patient got Pfizer-BioNTech vaccine and later reported severe dizziness, fatigue, and rash."
     ]
 
     predict_entities(sentences)
-
 
