@@ -208,7 +208,7 @@ The dashboard provides both **automation** and **interpretability**, bridging th
 [Project pipeline](https://github.com/Sugiuma/ADEGuard/blob/main/docs/Pipeline.md)
 
 
-## **How to Run**
+## 🔷 14. How to Run
 
 Download the model from:
 NER-model
@@ -249,36 +249,8 @@ streamlit run app.py
    
 Upload sample2.csv conatining `symptom_text`, `age`, (Check for sample in `data` folder in this repo). Also contains the final csv reports.
 
-### Architecture of ADEGuard
 
-```mermaid
-flowchart TD
-
-A[Raw VAERS Reports] --> B[BioBERT NER: Extract ADE/Drug Spans]
-A --> G[BioBERT Severity Classifier]
-G --> J[SHAP Explanations]
-
-%% NER Tab
-B --> C[NER Tab: Token-level Highlights Tab] 
-B --> D[Clustering & Visuals Tab] 
-G --> D
-
-%% Streamlit Dashboard Integration
-C --> L[Clinical Insights Tab]
-D --> L
-J --> L
-```
-
-### **Tab explanations**
-
-| Tab                    | Description                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------------- |
-| **NER Tab**            | Show extracted ADE/Drug spans token-by-token.                                               |
-| **Severity Tab**       | Show predicted severity from BioBERT trained on Snorkel weak labels & SHAP explanations. |
-| **Clustering Tab**     | Show modifier-aware + age-aware ADE clusters with interactive plots.                        |
-| **Clinical Insights Tab**          | Combines all tabs for the full visualization experience & insights                       |
-
-### 🛠️ **Tech Stack**
+## 🔷 14. Tech Stack
 
 * **Data**: VAERS dataset (COVID-19 subset), weak labels from structured fields
 * **Annotation**: Label Studio for gold standard ADE/DRUG span labeling
@@ -288,7 +260,7 @@ J --> L
 * **Explainability**: SHAP
 * **UI**: Streamlit dashboard with token-level highlights, cluster plots, explainability visualizations, Clinical Insights(downloadable as csv)
 
-## ⚙️ **Efficient Approaches in Model Deployment & Optimization**
+## 🔷 15. Efficient Approaches in Model Deployment & Optimization
 
 ### 🔹 **Model Architecture & Training Efficiency**
  **Layer Freezing for Efficient Fine-Tuning:**
