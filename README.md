@@ -1,3 +1,9 @@
+## **Business Problem:**
+
+1. Mass COVID-19 vaccination programs generated large-scale Adverse Drug Event (ADE) data that is difficult to analyze due to noisy, unstructured clinical narratives.
+2. Existing pharmacovigilance systems lack standardized severity labeling, contextual clinical details, and age-specific safety pattern discovery
+3. These gaps limit regulators and healthcare stakeholders from accurately assessing drug safety risks and making timely, evidence-based decisions.
+
 **Model Performance Reports**
 
 [NER Metrics](https://github.com/Sugiuma/ADEGuard/blob/main/docs/training.png)
